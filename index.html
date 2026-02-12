@@ -784,10 +784,22 @@ let FIREBASE_CHECKLISTS = [];
 // CARREGA DADOS DO FIREBASE
 async function carregarDadosFirebase() {
   try {
+    // Espera as funções Firebase estarem disponíveis
+    let attempts = 0;
+    while (!window.loadFirebaseResumos && attempts < 50) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
+    }
+    
+    if (!window.loadFirebaseResumos) {
+      console.error('❌ Funções Firebase não carregaram');
+      return;
+    }
+    
     console.log('🔥 Carregando dados do Firebase...');
     
     // Carrega resumos
-    const resumos = await loadFirebaseResumos();
+    const resumos = await window.loadFirebaseResumos();
     FIREBASE_RESUMOS = resumos.map(r => ({
       id: r.id,
       spec: r.spec || 'geral',
@@ -800,7 +812,7 @@ async function carregarDadosFirebase() {
     }));
     
     // Carrega frases
-    const frases = await loadFirebaseFrases();
+    const frases = await window.loadFirebaseFrases();
     FIREBASE_FRASES = frases.map(f => ({
       id: f.id,
       spec: 'geral', // Default spec
@@ -810,7 +822,7 @@ async function carregarDadosFirebase() {
     }));
     
     // Carrega templates
-    const templates = await loadFirebaseTemplates();
+    const templates = await window.loadFirebaseTemplates();
     FIREBASE_TEMPLATES = templates.map(t => ({
       id: t.id,
       spec: t.especialidade || 'geral',
@@ -822,7 +834,7 @@ async function carregarDadosFirebase() {
     }));
     
     // Carrega checklists  
-    const checklists = await loadFirebaseChecklists();
+    const checklists = await window.loadFirebaseChecklists();
     FIREBASE_CHECKLISTS = checklists.map(c => ({
       id: c.id,
       spec: 'geral',
