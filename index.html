@@ -397,7 +397,7 @@ body.light .frase-modal{box-shadow:0 16px 48px rgba(0,0,0,0.18);}
 </head>
 <body>
 <div class="hdr1">
-  <div class="logo" onclick="_0x7i8j('home',null)">RadioHub<span>v5.0🔥</span></div>
+  <div class="logo" onclick="_0x7i8j('home',null)">RadioHub<span>v5.1🔥</span></div>
   <nav class="main-nav">
     <button class="mnb active" onclick="_0x7i8j('home',this)">⌂ Início</button>
     <button class="mnb" onclick="_0x7i8j('resumos',this)">◈ Resumos</button>
@@ -774,7 +774,90 @@ const UPDATES=[
 const SECS=['resumos','artigos','calc','geradores','templates','frases','checklist'];
 let CSPEC={};SECS.forEach(s=>CSPEC[s]='all');
 let CSUB2={};SECS.forEach(s=>CSUB2[s]='all');
-function getData(sid){return{resumos:DR,artigos:DA,calc:DC,geradores:DG,templates:DT,frases:DF,checklist:DCK}[sid]||[];}
+
+// DADOS DO FIREBASE (carregados dinamicamente)
+let FIREBASE_RESUMOS = [];
+let FIREBASE_FRASES = [];
+let FIREBASE_TEMPLATES = [];
+let FIREBASE_CHECKLISTS = [];
+
+// CARREGA DADOS DO FIREBASE
+async function carregarDadosFirebase() {
+  try {
+    console.log('🔥 Carregando dados do Firebase...');
+    
+    // Carrega resumos
+    const resumos = await loadFirebaseResumos();
+    FIREBASE_RESUMOS = resumos.map(r => ({
+      id: r.id,
+      spec: r.spec || 'geral',
+      sub2: r.spec || 'Geral',
+      name: r.titulo || 'Sem título',
+      sub: `${r.spec} · ${r.titulo}`,
+      tags: r.tags || [],
+      body: r.body || r.texto || '<p>Conteúdo não disponível</p>',
+      img: '' // Firebase não tem imagens por enquanto
+    }));
+    
+    // Carrega frases
+    const frases = await loadFirebaseFrases();
+    FIREBASE_FRASES = frases.map(f => ({
+      id: f.id,
+      spec: 'geral', // Default spec
+      sub2: f.categoria || 'Sem categoria',
+      text: f.texto || '',
+      tags: []
+    }));
+    
+    // Carrega templates
+    const templates = await loadFirebaseTemplates();
+    FIREBASE_TEMPLATES = templates.map(t => ({
+      id: t.id,
+      spec: t.especialidade || 'geral',
+      sub2: 'Template',
+      name: t.nome || 'Sem nome',
+      sub: `Template · ${t.nome || 'Sem nome'}`,
+      tags: [],
+      txt: t.texto || ''
+    }));
+    
+    // Carrega checklists  
+    const checklists = await loadFirebaseChecklists();
+    FIREBASE_CHECKLISTS = checklists.map(c => ({
+      id: c.id,
+      spec: 'geral',
+      sub2: c.exame || 'Checklist',
+      name: c.nome || 'Sem nome',
+      sub: `${c.exame || 'Checklist'} · ${c.nome || 'Sem nome'}`,
+      tags: [],
+      itens: c.itens || []
+    }));
+    
+    console.log(`✅ Firebase carregado! ${FIREBASE_RESUMOS.length} resumos, ${FIREBASE_FRASES.length} frases, ${FIREBASE_TEMPLATES.length} templates, ${FIREBASE_CHECKLISTS.length} checklists`);
+    
+    // Recarrega a seção atual se for resumos/frases/templates/checklist
+    const currentSection = document.querySelector('.section.active');
+    if (currentSection) {
+      const sid = currentSection.id;
+      if (['resumos', 'frases', 'templates', 'checklist'].includes(sid)) {
+        _0x3e4f(sid);
+      }
+    }
+    
+  } catch (error) {
+    console.error('❌ Erro ao carregar Firebase:', error);
+  }
+}
+
+function getData(sid){
+  // Se tiver dados do Firebase, usa eles; senão usa os mock
+  if (sid === 'resumos' && FIREBASE_RESUMOS.length > 0) return [...DR, ...FIREBASE_RESUMOS];
+  if (sid === 'frases' && FIREBASE_FRASES.length > 0) return [...DF, ...FIREBASE_FRASES];
+  if (sid === 'templates' && FIREBASE_TEMPLATES.length > 0) return [...DT, ...FIREBASE_TEMPLATES];
+  if (sid === 'checklist' && FIREBASE_CHECKLISTS.length > 0) return [...DCK, ...FIREBASE_CHECKLISTS];
+  
+  return {resumos:DR,artigos:DA,calc:DC,geradores:DG,templates:DT,frases:DF,checklist:DCK}[sid]||[];
+}
 
 function _0x7i8j(id,btn){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
@@ -1299,8 +1382,8 @@ document.addEventListener('click',function(e){
 function init(){
   if(localStorage.getItem('rh_theme')==='light'){document.body.classList.add('light');document.getElementById('theme-btn').textContent='🌙 Escuro';}
   
-  // Load data from Supabase
-  _0x2c3d();
+  // Load data from Firebase 🔥
+  carregarDadosFirebase();
   
   SECS.forEach(sid=>_0x3e4f(sid));
   document.getElementById('upd-feed').innerHTML=UPDATES.map(u=>`<div class="upd"><div class="upd-date">${u.date}</div><span class="upd-badge ${u.badge}">${u.type}</span><div class="upd-text">${u.text}</div></div>`).join('');
