@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ════════════════════════════════════════════════════════════════════════════════
-  RadioHub v4.0 - Sistema de Ferramentas para Radiologia
+  RadioHub v5.0 - Sistema de Ferramentas para Radiologia + Firebase
   Copyright © 2026 Dr. Alan Diniz Hummel
   Todos os direitos reservados.
   
@@ -22,8 +22,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RadioHub — Ferramentas de Radiologia v4</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>RadioHub — Ferramentas de Radiologia v5 + Firebase</title>
+<!-- Firebase será carregado via ES modules no final do body -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -243,8 +243,24 @@ select.fi option{background:var(--surface);}
 .pill-c:checked+.pill-l{border-color:var(--gold);color:var(--gold);background:rgba(200,168,75,0.1);}
 .tirads-g{display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;}
 
-/* TEMPLATES */
-.laudo-area{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:var(--mono);font-size:0.77rem;padding:0.82rem 0.92rem;line-height:1.82;resize:vertical;min-height:260px;outline:none;transition:border-color 0.15s;}
+/* TEMPLATES / MÁSCARAS DE LAUDO */
+.laudo-area{
+  width:100%;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-sm);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:0.88rem;
+  padding:1.5rem 2rem;
+  line-height:1.9;
+  resize:vertical;
+  min-height:320px;
+  outline:none;
+  transition:border-color 0.15s;
+  white-space:pre-wrap;
+  word-wrap:break-word;
+}
 .laudo-area:focus{border-color:var(--accent);}
 .btn-ghost{display:inline-flex;align-items:center;gap:0.3rem;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:var(--r-sm);padding:0.4rem 0.8rem;font-family:var(--sans);font-size:0.74rem;cursor:pointer;transition:all 0.14s;margin-top:0.55rem;margin-right:0.35rem;}
 .btn-ghost:hover{color:var(--text);background:var(--surface2);}
@@ -381,14 +397,14 @@ body.light .frase-modal{box-shadow:0 16px 48px rgba(0,0,0,0.18);}
 </head>
 <body>
 <div class="hdr1">
-  <div class="logo" onclick="_0x7i8j('home',null)">RadioHub<span>v4.0</span></div>
+  <div class="logo" onclick="_0x7i8j('home',null)">RadioHub<span>v5.0🔥</span></div>
   <nav class="main-nav">
     <button class="mnb active" onclick="_0x7i8j('home',this)">⌂ Início</button>
     <button class="mnb" onclick="_0x7i8j('resumos',this)">◈ Resumos</button>
     <button class="mnb" onclick="_0x7i8j('artigos',this)">◉ Resumo de Artigos</button>
     <button class="mnb" onclick="_0x7i8j('calc',this)">◎ Calculadoras</button>
     <button class="mnb" onclick="_0x7i8j('geradores',this)">⊞ Geradores</button>
-    <button class="mnb" onclick="_0x7i8j('templates',this)">◻ Templates</button>
+    <button class="mnb" onclick="_0x7i8j('templates',this)">📋 Máscaras de Laudo</button>
     <button class="mnb" onclick="_0x7i8j('frases',this)">❝ Frases</button>
     <button class="mnb" onclick="_0x7i8j('checklist',this)">✓ Checklist</button>
   </nav>
@@ -431,7 +447,7 @@ body.light .frase-modal{box-shadow:0 16px 48px rgba(0,0,0,0.18);}
         <div class="hg-card" onclick="_0x7i8j('artigos',document.querySelectorAll('.mnb')[2])"><div class="hg-icon">📄</div><div class="hg-name">Artigos</div><div class="hg-desc">Resumo de evidências</div></div>
         <div class="hg-card" onclick="_0x7i8j('calc',document.querySelectorAll('.mnb')[3])"><div class="hg-icon">🧮</div><div class="hg-name">Calculadoras</div><div class="hg-desc">eGFR · TI-RADS · BI-RADS</div></div>
         <div class="hg-card" onclick="_0x7i8j('geradores',document.querySelectorAll('.mnb')[4])"><div class="hg-icon">⚙️</div><div class="hg-name">Geradores</div><div class="hg-desc">RM Cardíaca</div></div>
-        <div class="hg-card" onclick="_0x7i8j('templates',document.querySelectorAll('.mnb')[5])"><div class="hg-icon">📋</div><div class="hg-name">Templates</div><div class="hg-desc">Por especialidade</div></div>
+        <div class="hg-card" onclick="_0x7i8j('templates',document.querySelectorAll('.mnb')[5])"><div class="hg-icon">📋</div><div class="hg-name">Máscaras de Laudo</div><div class="hg-desc">Copie e cole no Word</div></div>
         <div class="hg-card" onclick="_0x7i8j('frases',document.querySelectorAll('.mnb')[6])"><div class="hg-icon">💬</div><div class="hg-name">Frases</div><div class="hg-desc">1 clique · copiar</div></div>
         <div class="hg-card" onclick="_0x7i8j('checklist',document.querySelectorAll('.mnb')[7])"><div class="hg-icon">✅</div><div class="hg-name">Checklist</div><div class="hg-desc">Relatórios estruturados</div></div>
       </div>
@@ -467,7 +483,7 @@ body.light .frase-modal{box-shadow:0 16px 48px rgba(0,0,0,0.18);}
     </div>
 
     <div id="templates" class="section">
-      <div class="page-hdr"><div class="page-title"><em>Templates</em></div><div class="page-sub">Edite e copie · Por especialidade</div></div>
+      <div class="page-hdr"><div class="page-title"><em>Máscaras de Laudo</em></div><div class="page-sub">Formatado para Word · Copie com 1 clique</div></div>
       <div class="search-wrap"><span class="srch-icon">🔍</span><input class="srch" type="text" placeholder="Buscar templates..." oninput="_0x4f5g('templates',this.value)"></div>
       <div class="card-grid" id="grid-templates"></div>
     </div>
@@ -517,12 +533,11 @@ console.log('%c📧 Contato para licenciamento: alandinizhummel@gmail.com\n', 'c
 console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #4f8ef7;');
 
 // ════════════════════════════════════════════════════════════════════════════════
-// SUPABASE CONFIG 🇧🇷
+// FIREBASE CONFIG 🔥 (Supabase removido)
 // ════════════════════════════════════════════════════════════════════════════════
-const _0x1a2b = window.supabase.createClient(
-  'https://pwkwzjxwmkyzgwflnqxh.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3a3d6anh3bWt5emd3ZmxucXhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4OTE2MzQsImV4cCI6MjA4NjQ2NzYzNH0.d9WVqxNLvskhrSluI4FeBnKpYd4CBtP7vk-pl8l1Vww'
-);
+// Firebase é carregado via ES modules no final do HTML
+// Use: loadFirebaseTemplates(), loadFirebaseFrases(), loadFirebaseChecklists(), loadFirebaseResumos()
+
 
 // ============================================
 // SPECS
@@ -932,9 +947,57 @@ function _0x6h7i(){
   document.getElementById('panel-overlay').classList.remove('open');
   document.getElementById('main-content').classList.remove('panel-open');
 }
-function buildTplPanel(item){return`<textarea class="laudo-area" id="tpl-ta">${item.t||''}</textarea><div><button class="btn-ghost" onclick="copyTpl()">📋 Copiar</button><button class="btn-ghost" onclick="clearTpl()">✕ Limpar</button></div>`;}
-function copyTpl(){navigator.clipboard.writeText(document.getElementById('tpl-ta').value);toast('Template copiado!');}
-function clearTpl(){document.getElementById('tpl-ta').value='';}
+function buildTplPanel(item){
+  // Formata o template para ficar bonito e copiar bem pro Word
+  let formatted = (item.t||'').trim();
+  
+  // Detecta a primeira linha como título (geralmente em CAPS ou entre [ ])
+  const lines = formatted.split('\n');
+  if(lines.length > 0){
+    const firstLine = lines[0].trim();
+    // Se primeira linha é título (maiúsculas ou entre [])
+    if(firstLine.toUpperCase()===firstLine || firstLine.match(/^\[.*\]$/)){
+      formatted = `<div style="text-align:center;font-weight:700;font-size:1.1em;margin-bottom:1.5em;font-family:Arial,sans-serif;">${firstLine}</div>\n` + lines.slice(1).join('\n');
+    }
+  }
+  
+  // Adiciona negrito em seções (linhas que terminam com :)
+  formatted = formatted.replace(/^([A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][^\n:]{0,30}:)/gm, '<strong>$1</strong>');
+  
+  // Preserva quebras de linha e espaços
+  formatted = formatted.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;');
+  
+  return`
+    <div style="margin-bottom:1rem;padding:1.5rem 2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);line-height:1.9;font-size:0.88rem;font-family:Arial,sans-serif;" id="tpl-display">${formatted}</div>
+    <div style="display:none;"><textarea class="laudo-area" id="tpl-ta">${item.t||''}</textarea></div>
+    <div>
+      <button class="btn-ghost" onclick="copyTplFormatted()">📋 Copiar (Word)</button>
+      <button class="btn-ghost" onclick="copyTplPlain()">📄 Copiar Texto Simples</button>
+    </div>
+  `;
+}
+function copyTplFormatted(){
+  // Copia HTML formatado (funciona no Word!)
+  const html = document.getElementById('tpl-display').innerHTML;
+  const text = document.getElementById('tpl-ta').value;
+  
+  const blob = new ClipboardItem({
+    'text/html': new Blob([html], {type: 'text/html'}),
+    'text/plain': new Blob([text], {type: 'text/plain'})
+  });
+  
+  navigator.clipboard.write([blob]).then(()=>{
+    toast('✓ Máscara copiada com formatação!');
+  }).catch(()=>{
+    // Fallback para texto simples
+    navigator.clipboard.writeText(text);
+    toast('✓ Máscara copiada (texto simples)');
+  });
+}
+function copyTplPlain(){
+  navigator.clipboard.writeText(document.getElementById('tpl-ta').value);
+  toast('✓ Texto copiado!');
+}
 function buildChkPanel(item){
   return`
     <h3>Frase completa</h3>
@@ -1129,7 +1192,36 @@ function initVisitCounter(){
 function toast(msg){const t=document.getElementById('toast');t.textContent='✓ '+msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
 
 function openRMCardiaca(){
-  window.open('calculadoras/rm-cardiaca.html','_blank');
+  // Create fullscreen iframe overlay BELOW header
+  const overlay = document.createElement('div');
+  overlay.id = 'iframe-overlay';
+  overlay.style.cssText = 'position:fixed;top:90px;left:0;right:0;bottom:0;z-index:9999;background:#fff;';
+  
+  // Create close button bar
+  const closeBar = document.createElement('div');
+  closeBar.style.cssText = 'background:#f4f5f8;padding:0.6rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e2e5ed;';
+  closeBar.innerHTML = `
+    <span style="font-family:var(--sans);font-size:0.85rem;color:#3d4354;font-weight:500;">RM Cardíaca · Gerador de Laudo</span>
+    <button onclick="closeIframe()" style="background:#e05c5c;color:#fff;border:none;padding:0.4rem 1rem;border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:0.75rem;font-weight:500;transition:all 0.15s;">
+      ✕ Fechar
+    </button>
+  `;
+  
+  // Create iframe
+  const iframe = document.createElement('iframe');
+  iframe.src = 'calculadoras/rm-cardiaca.html';
+  iframe.style.cssText = 'width:100%;height:calc(100% - 50px);border:none;display:block;';
+  
+  overlay.appendChild(closeBar);
+  overlay.appendChild(iframe);
+  document.body.appendChild(overlay);
+}
+
+function closeIframe(){
+  const overlay = document.getElementById('iframe-overlay');
+  if(overlay){
+    overlay.remove();
+  }
 }
 
 // ============================================
@@ -1227,5 +1319,138 @@ function init(){
 }
 init();
 </script>
+
+<script type="module">
+// ═══════════════════════════════════════════════════════════════════
+// RadioHub v5 - Firebase Integration
+// ═══════════════════════════════════════════════════════════════════
+
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getFirestore, collection, getDocs, query, orderBy, where } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDPfsLU4-T9MTD8u2_6njXbzcXycGdRRyU",
+  authDomain: "radiohub-5335d.firebaseapp.com",
+  projectId: "radiohub-5335d",
+  storageBucket: "radiohub-5335d.firebasestorage.app",
+  messagingSenderId: "838191270589",
+  appId: "1:838191270589:web:7ca04a776d9ea1a85305d4"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// CARREGA TEMPLATES/MÁSCARAS DO FIREBASE
+window.loadFirebaseTemplates = async function(especialidade = '') {
+  try {
+    let q;
+    if (especialidade) {
+      q = query(collection(db, 'templates'), where('especialidade', '==', especialidade), orderBy('createdAt', 'desc'));
+    } else {
+      q = query(collection(db, 'templates'), orderBy('createdAt', 'desc'));
+    }
+    const snapshot = await getDocs(q);
+    const templates = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      templates.push({
+        id: doc.id,
+        nome: data.nome || '',
+        especialidade: data.especialidade || '',
+        texto: data.texto || ''
+      });
+    });
+    return templates;
+  } catch (error) {
+    console.error('Erro ao carregar templates:', error);
+    return [];
+  }
+};
+
+// CARREGA FRASES DO FIREBASE
+window.loadFirebaseFrases = async function(categoria = '') {
+  try {
+    let q;
+    if (categoria) {
+      q = query(collection(db, 'frases'), where('categoria', '==', categoria), orderBy('createdAt', 'desc'));
+    } else {
+      q = query(collection(db, 'frases'), orderBy('createdAt', 'desc'));
+    }
+    const snapshot = await getDocs(q);
+    const frases = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      frases.push({
+        id: doc.id,
+        categoria: data.categoria || '',
+        texto: data.texto || ''
+      });
+    });
+    return frases;
+  } catch (error) {
+    console.error('Erro ao carregar frases:', error);
+    return [];
+  }
+};
+
+// CARREGA CHECKLISTS DO FIREBASE
+window.loadFirebaseChecklists = async function(exame = '') {
+  try {
+    let q;
+    if (exame) {
+      q = query(collection(db, 'checklists'), where('exame', '==', exame), orderBy('createdAt', 'desc'));
+    } else {
+      q = query(collection(db, 'checklists'), orderBy('createdAt', 'desc'));
+    }
+    const snapshot = await getDocs(q);
+    const checklists = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      checklists.push({
+        id: doc.id,
+        nome: data.nome || '',
+        exame: data.exame || '',
+        itens: data.itens || []
+      });
+    });
+    return checklists;
+  } catch (error) {
+    console.error('Erro ao carregar checklists:', error);
+    return [];
+  }
+};
+
+// CARREGA RESUMOS DO FIREBASE
+window.loadFirebaseResumos = async function(especialidade = '') {
+  try {
+    let q;
+    if (especialidade) {
+      q = query(collection(db, 'resumos'), where('spec', '==', especialidade), orderBy('createdAt', 'desc'));
+    } else {
+      q = query(collection(db, 'resumos'), orderBy('createdAt', 'desc'));
+    }
+    const snapshot = await getDocs(q);
+    const resumos = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      resumos.push({
+        id: doc.id,
+        titulo: data.titulo || '',
+        spec: data.spec || '',
+        tags: data.tags || [],
+        body: data.body || '',
+        texto: data.texto || ''
+      });
+    });
+    return resumos;
+  } catch (error) {
+    console.error('Erro ao carregar resumos:', error);
+    return [];
+  }
+};
+
+console.log('🔥 RadioHub v5 + Firebase carregado! Use loadFirebaseTemplates(), loadFirebaseFrases(), loadFirebaseChecklists(), loadFirebaseResumos()');
+</script>
+
 </body>
 </html>
