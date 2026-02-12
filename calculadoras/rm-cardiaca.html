@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<!--
+════════════════════════════════════════════════════════════════════════════════
+  RadioHub - Calculadora RM Cardíaca
+  Copyright © 2026 Dr. Alan Diniz Hummel
+  Todos os direitos reservados.
+  
+  ⚠️ PROPRIEDADE PROTEGIDA - Uso não autorizado é CRIME (Lei 9.610/98)
+  📧 Contato: alandinizhummel@gmail.com
+════════════════════════════════════════════════════════════════════════════════
+-->
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RM Cardíaca · Laudo</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+    <style>
+        /* ─── RESET ─────────────────────────── */
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        /* ─── TOKENS ────────────────────────── */
+        :root {
+            --ink:       #0f1117;
+            --ink-2:     #3d4354;
+            --ink-3:     #7c8499;
+            --ink-4:     #b0b8cc;
+            --surface:   #f4f5f8;
+            --surface-2: #ffffff;
+            --border:    #e2e5ed;
+            --border-2:  #c8cdd9;
+
+            --accent:    #1756c8;
+            --accent-lo: #e8eef9;
+            --accent-hi: #0d3a8a;
+
+            --ve:   #c0392b;
+            --vd:   #1756c8;
+            --ae:   #8e44ad;
+            --ad:   #16a085;
+
+            --ok:   #16a34a;
+            --ok-lo:#dcfce7;
+            --w1:   #b45309;
+            --w1-lo:#fef3c7;
+            --w2:   #c2410c;
+            --w2-lo:#ffedd5;
+            --err:  #b91c1c;
+            --err-lo:#fee2e2;
+
+            --radius: 10px;
+            --radius-sm: 6px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
+            --shadow:    0 4px 12px rgba(0,0,0,.08), 0 1px 3px rgba(0,0,0,.05);
+            --shadow-lg: 0 12px 32px rgba(0,0,0,.10), 0 2px 6px rgba(0,0,0,.05);
+
+            --font-sans: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'DM Mono', monospace;
+            --font-display: 'Playfair Display', Georgia, serif;
+        }
+
+        /* ─── BASE ──────────────────────────── */
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-sans);
+            background: var(--surface);
+            color: var(--ink);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        /* ─── HEADER ────────────────────────── */
+        .header {
+            background: var(--ink);
+            color: white;
+            padding: 0 2rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+        .header h1 {
+            font-family: var(--font-display);
+            font-size: 1.15rem;
+            font-weight: 600;
+            letter-spacing: .01em;
+            color: white;
+        }
+        .header-badge {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            background: rgba(255,255,255,.1);
+            border: 1px solid rgba(255,255,255,.15);
+            color: rgba(255,255,255,.7);
+            padding: .25rem .65rem;
+            border-radius: 20px;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+
+        /* ─── LAYOUT ────────────────────────── */
+        .container {
+            display: grid;
+            grid-template-columns: 50% 1fr;
+            min-height: calc(100vh - 60px);
+        }
+        .left-panel {
+            background: var(--surface-2);
+            overflow-y: auto;
+            padding: 1.75rem;
+            border-right: 1px solid var(--border);
+        }
+        .right-panel {
+            background: var(--surface);
+            overflow-y: auto;
+            padding: 1.75rem;
+        }
+
+        /* ─── SECTIONS ──────────────────────── */
+        .section {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1rem;
+            transition: box-shadow .2s;
+        }
+        .section:hover { box-shadow: var(--shadow-sm); }
+
+        .section-title {
+            font-size: .72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--ink-3);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+        .section-title::before {
+            content: '';
+            display: block;
+            width: 3px;
+            height: 14px;
+            border-radius: 2px;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        /* ─── DOTS ──────────────────────────── */
+        .dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+        .dot.ve { background: var(--ve); }
+        .dot.vd { background: var(--vd); }
+        .dot.ae { background: var(--ae); }
+        .dot.ad { background: var(--ad); }
+
+        /* ─── FORMS ─────────────────────────── */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: .75rem;
+            margin-bottom: .75rem;
+        }
+        .form-group { display: flex; flex-direction: column; gap: .3rem; }
+        .form-group label {
+            font-size: .75rem;
+            font-weight: 500;
+            color: var(--ink-3);
+            letter-spacing: .02em;
+        }
+        .form-group input,
+        .form-group select {
+            padding: .5rem .75rem;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: .9rem;
+            font-family: var(--font-sans);
+            background: var(--surface);
+            color: var(--ink);
+            transition: border-color .15s, box-shadow .15s;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(23,86,200,.12);
+        }
+        .form-group input[readonly] {
+            background: var(--surface);
+            color: var(--ink-3);
+            cursor: default;
+        }
+
+        /* ─── METHOD BUTTONS ────────────────── */
+        .method-selector { display: flex; gap: .5rem; margin-bottom: 1.25rem; }
+        .method-btn {
+            flex: 1;
+            padding: .6rem;
+            border: 1.5px solid var(--border);
+            background: white;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: .85rem;
+            font-family: var(--font-sans);
+            color: var(--ink-2);
+            transition: all .15s;
+        }
+        .method-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .method-btn.active {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 2px 8px rgba(23,86,200,.25);
+        }
+
+        /* ─── VOLUMES TABLE ─────────────────── */
+        .volumes-table { width: 100%; border-collapse: collapse; margin-top: .75rem; font-size: .85rem; }
+        .volumes-table th {
+            padding: .5rem .6rem;
+            text-align: left;
+            font-size: .72rem;
+            font-weight: 600;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--ink-3);
+            border-bottom: 2px solid var(--border);
+        }
+        .volumes-table td {
+            padding: .35rem .5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .volumes-table input {
+            width: 100%;
+            padding: .3rem .5rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: .85rem;
+            font-family: var(--font-mono);
+            background: white;
+        }
+        .volumes-table input:focus { outline: none; border-color: var(--accent); }
+        .volumes-table td:first-child {
+            font-family: var(--font-mono);
+            font-size: .75rem;
+            font-weight: 500;
+            color: var(--ink-4);
+            width: 32px;
+            text-align: center;
+        }
+        .table-footer { font-weight: 600; background: var(--surface); }
+        .table-footer td { color: var(--accent); font-family: var(--font-mono); }
+
+        /* ─── RESULT CARDS ──────────────────── */
+        .result-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem 1.25rem;
+            margin-bottom: .75rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: .6rem;
+        }
+        .result-item {
+            background: var(--surface);
+            padding: .85rem 1rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            border-top: 3px solid var(--border);
+            transition: transform .15s, box-shadow .15s;
+        }
+        .result-item:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+        .result-item.normal  { border-top-color: var(--ok);  background: var(--ok-lo); }
+        .result-item.discreto{ border-top-color: var(--w1);  background: var(--w1-lo); }
+        .result-item.moderado{ border-top-color: var(--w2);  background: var(--w2-lo); }
+        .result-item.acentuado{border-top-color: var(--err); background: var(--err-lo);}
+
+        .result-item label {
+            font-size: .7rem;
+            font-weight: 600;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: var(--ink-3);
+            display: block;
+            margin-bottom: .25rem;
+        }
+        .result-item .value {
+            font-family: var(--font-mono);
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: var(--ink);
+            line-height: 1;
+        }
+        .result-item .unit {
+            font-size: .7rem;
+            color: var(--ink-3);
+            margin-left: .15rem;
+        }
+        .result-item .reference {
+            font-size: .67rem;
+            color: var(--ink-4);
+            margin-top: .3rem;
+            line-height: 1.3;
+        }
+        .status-badge {
+            display: inline-block;
+            margin-top: .35rem;
+            font-size: .6rem;
+            padding: .15rem .5rem;
+            border-radius: 20px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+        .status-badge.normal   { background: var(--ok);  color: white; }
+        .status-badge.discreto { background: var(--w1);  color: white; }
+        .status-badge.moderado { background: var(--w2);  color: white; }
+        .status-badge.acentuado{ background: var(--err); color: white; }
+
+        /* ─── RESULTS HEADER ────────────────── */
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .results-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            color: var(--ink);
+        }
+        .abnt-toggle {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            font-size: .78rem;
+            color: var(--ink-3);
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .abnt-toggle input { width:16px; height:16px; cursor:pointer; accent-color: var(--accent); }
+
+        /* ─── BUTTONS ───────────────────────── */
+        .btn {
+            padding: .6rem 1.25rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: .85rem;
+            font-weight: 500;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            transition: all .15s;
+            letter-spacing: .01em;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            width: 100%;
+            margin-top: .75rem;
+        }
+        .btn-primary:hover { background: var(--accent-hi); box-shadow: 0 3px 10px rgba(23,86,200,.3); }
+        .btn-secondary {
+            background: white;
+            color: var(--ink-2);
+            border: 1.5px solid var(--border);
+        }
+        .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-danger {
+            background: white;
+            color: var(--err);
+            border: 1.5px solid var(--err-lo);
+        }
+        .btn-danger:hover { background: var(--err-lo); }
+
+        /* ─── EDITOR ────────────────────────── */
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: .75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .editor-title {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            color: var(--ink);
+        }
+        .editor-actions { display: flex; gap: .4rem; flex-wrap: wrap; align-items: center; }
+
+        #laudoEditor {
+            width: 100%;
+            min-height: 580px;
+            padding: 2.5cm 3cm;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 12pt;
+            font-family: Arial, sans-serif;
+            line-height: 1.5;
+            background: white;
+            color: #000;
+            text-align: justify;
+            box-sizing: border-box;
+            outline: none;
+            cursor: text;
+            box-shadow: var(--shadow);
+        }
+        #laudoEditor:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(23,86,200,.1), var(--shadow); }
+        #laudoEditor p { margin: 0; line-height: 1.5; }
+
+        /* ─── MISC ──────────────────────────── */
+        .hidden { display: none; }
+        .note { font-size: .72rem; color: var(--ink-4); font-style: italic; margin-top: .4rem; }
+        .calc-input { font-family: var(--font-mono) !important; }
+
+        /* diff volumes inline */
+        #card_diff_volumes_ve {
+            font-family: var(--font-mono);
+            font-size: .75rem;
+            font-weight: 500;
+            margin-top: .4rem;
+            padding: .25rem .4rem;
+            border-radius: 4px;
+            display: none;
+        }
+
+        /* ─── SCROLLBAR ─────────────────────── */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--ink-4); }
+
+        /* ─── RESPONSIVE ────────────────────── */
+        @media (max-width: 1100px) {
+            .container { grid-template-columns: 1fr; }
+            .left-panel { border-right: none; border-bottom: 1px solid var(--border); }
+        }
+
+        /* ─── TOOLTIP ───────────────────────── */
+        [data-tooltip] { position: relative; cursor: default; }
+        [data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--ink);
+            color: white;
+            font-size: .7rem;
+            font-family: var(--font-sans);
+            font-weight: 500;
+            padding: .3rem .6rem;
+            border-radius: 5px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity .15s;
+            z-index: 999;
+        }
+        [data-tooltip]:hover::after { opacity: 1; }
+
+        /* ─── REF LINK ──────────────────────── */
+        .ref-link {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: .68rem;
+            font-family: var(--font-mono);
+            font-weight: 500;
+            cursor: pointer;
+            padding: .1rem .3rem;
+            border-radius: 3px;
+            opacity: .7;
+            transition: opacity .15s, background .15s;
+            letter-spacing: .02em;
+        }
+        .ref-link:hover { opacity: 1; background: var(--accent-lo); }
+
+        /* ─── MODAL REFERÊNCIA ──────────────── */
+        #refModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.45);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        #refModal.open { display: flex; }
+        .ref-modal-box {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            padding: 1.5rem;
+            max-width: 680px;
+            width: 95%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .ref-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: .75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .ref-modal-header h3 {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            color: var(--ink);
+        }
+        .ref-modal-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--ink-3);
+            padding: .2rem .4rem;
+            border-radius: 4px;
+        }
+        .ref-modal-close:hover { background: var(--surface); color: var(--ink); }
+        .ref-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .8rem;
+        }
+        .ref-table th {
+            padding: .45rem .6rem;
+            text-align: left;
+            font-size: .68rem;
+            font-weight: 600;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--ink-3);
+            border-bottom: 2px solid var(--border);
+            background: var(--surface);
+        }
+        .ref-table td {
+            padding: .4rem .6rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--ink-2);
+            font-family: var(--font-mono);
+            font-size: .78rem;
+        }
+        .ref-table tr:last-child td { border-bottom: none; }
+        .ref-table tr:hover td { background: var(--surface); }
+        .ref-table td:first-child { font-family: var(--font-sans); font-weight: 500; color: var(--ink); }
+        .ref-badge-normal   { color: var(--ok);  font-weight: 600; }
+        .ref-badge-discreto { color: var(--w1);  font-weight: 600; }
+        .ref-badge-moderado { color: var(--w2);  font-weight: 600; }
+        .ref-badge-acentuado{ color: var(--err); font-weight: 600; }
+        .ref-source {
+            margin-top: 1rem;
+            font-size: .7rem;
+            color: var(--ink-4);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <header class="header"><h1>🫀 RM Cardíaca</h1><span class="header-badge">v10 · Laudo Assistido</span></header>
+    <div class="container">
+        <div class="left-panel">
+            <div class="section">
+                <div class="section-title">Dados do Paciente</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Idade</label><input type="number" id="idade"></div>
+                    <div class="form-group"><label>Sexo</label><select id="sexo" onchange="atualizarReferencias()"><option value="">Selecione</option><option value="Masculino">Masculino</option><option value="Feminino">Feminino</option></select></div>
+                    <div class="form-group"><label>Altura (cm)</label><input type="number" id="altura"></div>
+                    <div class="form-group"><label>Peso (kg)</label><input type="number" id="peso"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>ASC (m²)</label><input type="number" id="asc" step="0.01" readonly style="background: #f0f0f0;"></div>
+                    <div class="form-group"><label>Referência</label><select id="referencia" onchange="atualizarReferencias()"><option value="ESC">ESC 2020</option><option value="ESC_AJUSTADO">ESC 2020 Ajustado</option></select></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Método para Calcular Volumes Ventriculares</div>
+                <div class="method-selector">
+                    <button class="method-btn active" onclick="selectMethod('manual')">Manual</button>
+                    <button class="method-btn" onclick="selectMethod('app')">Aplicativo Terceiro</button>
+                </div>
+                <div style="margin-top: 1rem; margin-bottom: 1rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="calcularMassaVD" onchange="toggleMassaVD()" style="width: 18px; height: 18px; cursor: pointer;">
+                        <span style="font-weight: 500;">Calcular massa do VD</span>
+                    </label>
+                </div>
+                <div id="manualMethod">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="font-size: 1rem; margin: 0;">Diástole - Áreas dos Cortes</h3>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="adicionarCorte('dias')" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">+ Corte</button>
+                            <button onclick="removerCorte('dias')" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">- Corte</button>
+                        </div>
+                    </div>
+                    <table class="volumes-table" id="diasTable">
+                        <thead><tr><th>Corte</th><th>VE Endo (cm²)</th><th>VE Epi (cm²)</th><th>VD Endo (cm²)</th><th class="vd-epi-col hidden">VD Epi (cm²)</th></tr></thead>
+                        <tbody id="diasTableBody">
+                            <tr data-row="1"><td>1</td><td><input type="number" step="0.1" id="dias_ve_endo_1" class="calc-input"></td><td><input type="number" step="0.1" id="dias_ve_epi_1" class="calc-input"></td><td><input type="number" step="0.1" id="dias_vd_endo_1" class="calc-input"></td><td class="vd-epi-col hidden"><input type="number" step="0.1" id="dias_vd_epi_1" class="calc-input"></td></tr>
+                            <tr data-row="2"><td>2</td><td><input type="number" step="0.1" id="dias_ve_endo_2" class="calc-input"></td><td><input type="number" step="0.1" id="dias_ve_epi_2" class="calc-input"></td><td><input type="number" step="0.1" id="dias_vd_endo_2" class="calc-input"></td><td class="vd-epi-col hidden"><input type="number" step="0.1" id="dias_vd_epi_2" class="calc-input"></td></tr>
+                            <tr data-row="3"><td>3</td><td><input type="number" step="0.1" id="dias_ve_endo_3" class="calc-input"></td><td><input type="number" step="0.1" id="dias_ve_epi_3" class="calc-input"></td><td><input type="number" step="0.1" id="dias_vd_endo_3" class="calc-input"></td><td class="vd-epi-col hidden"><input type="number" step="0.1" id="dias_vd_epi_3" class="calc-input"></td></tr>
+                            <tr data-row="4"><td>4</td><td><input type="number" step="0.1" id="dias_ve_endo_4" class="calc-input"></td><td><input type="number" step="0.1" id="dias_ve_epi_4" class="calc-input"></td><td><input type="number" step="0.1" id="dias_vd_endo_4" class="calc-input"></td><td class="vd-epi-col hidden"><input type="number" step="0.1" id="dias_vd_epi_4" class="calc-input"></td></tr>
+                            <tr data-row="5"><td>5</td><td><input type="number" step="0.1" id="dias_ve_endo_5" class="calc-input"></td><td><input type="number" step="0.1" id="dias_ve_epi_5" class="calc-input"></td><td><input type="number" step="0.1" id="dias_vd_endo_5" class="calc-input"></td><td class="vd-epi-col hidden"><input type="number" step="0.1" id="dias_vd_epi_5" class="calc-input"></td></tr>
+                            <tr data-row="6"><td>6</td><td><input type="number" step="0.1" id="dias_ve_endo_6" class="calc-input"></td><td><input type="number" step="0.1" id="dias_ve_epi_6" class="calc-input"></td><td><input type="number" step="0.1" id="dias_vd_endo_6" class="calc-input"></td><td class="vd-epi-col hidden"><input type="number" step="0.1" id="dias_vd_epi_6" class="calc-input"></td></tr>
+                            <tr data-row="7"><td>7</td><td><input type="number" step="0.1" id="dias_ve_endo_7" class="calc-input"></td><td><input type="number" step="0.1" id="dias_ve_epi_7" class="calc-input"></td><td><input type="number" step="0.1" id="dias_vd_endo_7" class="calc-input"></td><td class="vd-epi-col hidden"><input type="number" step="0.1" id="dias_vd_epi_7" class="calc-input"></td></tr>
+                            <tr data-row="8"><td>8</td><td><input type="number" step="0.1" id="dias_ve_endo_8" class="calc-input"></td><td><input type="number" step="0.1" id="dias_ve_epi_8" class="calc-input"></td><td><input type="number" step="0.1" id="dias_vd_endo_8" class="calc-input"></td><td class="vd-epi-col hidden"><input type="number" step="0.1" id="dias_vd_epi_8" class="calc-input"></td></tr>
+                        </tbody>
+                        <tfoot><tr class="table-footer"><td>Total</td><td><span id="dias_ve_total">-</span></td><td><span id="dias_epi_total">-</span></td><td><span id="dias_vd_total">-</span></td><td class="vd-epi-col hidden"><span id="dias_vd_epi_total">-</span></td></tr></tfoot>
+                    </table>
+                    <p class="note">* Espessura do corte = 1 cm, soma das áreas = volume em ml</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin: 1.5rem 0 1rem;">
+                        <h3 style="font-size: 1rem; margin: 0;">Sístole - Áreas dos Cortes</h3>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="adicionarCorte('sist')" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">+ Corte</button>
+                            <button onclick="removerCorte('sist')" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">- Corte</button>
+                        </div>
+                    </div>
+                    <table class="volumes-table" id="sistTable">
+                        <thead><tr><th>Corte</th><th>VE Endo (cm²)</th><th>VD Endo (cm²)</th></tr></thead>
+                        <tbody id="sistTableBody">
+                            <tr data-row="1"><td>1</td><td><input type="number" step="0.1" id="sist_ve_endo_1" class="calc-input"></td><td><input type="number" step="0.1" id="sist_vd_endo_1" class="calc-input"></td></tr>
+                            <tr data-row="2"><td>2</td><td><input type="number" step="0.1" id="sist_ve_endo_2" class="calc-input"></td><td><input type="number" step="0.1" id="sist_vd_endo_2" class="calc-input"></td></tr>
+                            <tr data-row="3"><td>3</td><td><input type="number" step="0.1" id="sist_ve_endo_3" class="calc-input"></td><td><input type="number" step="0.1" id="sist_vd_endo_3" class="calc-input"></td></tr>
+                            <tr data-row="4"><td>4</td><td><input type="number" step="0.1" id="sist_ve_endo_4" class="calc-input"></td><td><input type="number" step="0.1" id="sist_vd_endo_4" class="calc-input"></td></tr>
+                            <tr data-row="5"><td>5</td><td><input type="number" step="0.1" id="sist_ve_endo_5" class="calc-input"></td><td><input type="number" step="0.1" id="sist_vd_endo_5" class="calc-input"></td></tr>
+                            <tr data-row="6"><td>6</td><td><input type="number" step="0.1" id="sist_ve_endo_6" class="calc-input"></td><td><input type="number" step="0.1" id="sist_vd_endo_6" class="calc-input"></td></tr>
+                            <tr data-row="7"><td>7</td><td><input type="number" step="0.1" id="sist_ve_endo_7" class="calc-input"></td><td><input type="number" step="0.1" id="sist_vd_endo_7" class="calc-input"></td></tr>
+                            <tr data-row="8"><td>8</td><td><input type="number" step="0.1" id="sist_ve_endo_8" class="calc-input"></td><td><input type="number" step="0.1" id="sist_vd_endo_8" class="calc-input"></td></tr>
+                        </tbody>
+                        <tfoot><tr class="table-footer"><td>Total</td><td><span id="sist_ve_total">-</span></td><td><span id="sist_vd_total">-</span></td></tr></tfoot>
+                    </table>
+                    <p class="note">* Espessura do corte = 1 cm, soma das áreas = volume em ml</p>
+                </div>
+                <div id="appMethod" class="hidden">
+                    <h3 style="font-size: 1rem; margin-bottom: 1rem;">Ventrículo Esquerdo</h3>
+                    <div class="form-row">
+                        <div class="form-group"><label>VDF (ml)</label><input type="number" step="0.1" id="app_ve_vdf" oninput="calcularTempo()"></div>
+                        <div class="form-group"><label>VSF (ml)</label><input type="number" step="0.1" id="app_ve_vsf" oninput="calcularTempo()"></div>
+                        <div class="form-group"><label>Massa (g)</label><input type="number" step="0.1" id="app_ve_massa" oninput="calcularTempo()"></div>
+                    </div>
+                    <h3 style="font-size: 1rem; margin: 1.5rem 0 1rem;">Ventrículo Direito</h3>
+                    <div class="form-row">
+                        <div class="form-group"><label>VDF (ml)</label><input type="number" step="0.1" id="app_vd_vdf" oninput="calcularTempo()"></div>
+                        <div class="form-group"><label>VSF (ml)</label><input type="number" step="0.1" id="app_vd_vsf" oninput="calcularTempo()"></div>
+                        <div class="form-group vd-massa-field hidden"><label>Massa (g)</label><input type="number" step="0.1" id="app_vd_massa" oninput="calcularTempo()"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="dot ve"></span>Medidas do VE</div>
+                <div class="form-row">
+                    <div class="form-group"><label>DDF (cm)</label><input type="number" step="0.1" id="ve_ddf" oninput="calcularTempo()"></div>
+                    <div class="form-group"><label>Espessura Septo (cm)</label><input type="number" step="0.1" id="ve_esp_septo" oninput="calcularTempo()"></div>
+                    <div class="form-group"><label>Espessura Parede Inferior (cm)</label><input type="number" step="0.1" id="ve_esp_inferior" oninput="calcularTempo()"></div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="incluirMedidasVE" checked onchange="gerarLaudo()" style="width: 18px; height: 18px; cursor: pointer;">
+                        <span style="font-weight: 500;">Incluir no relatório final</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="dot ae"></span>Átrio Esquerdo<button class="ref-link" onclick="mostrarReferencia('AE')" title="Ver tabela de referência">* Referência</button></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Área 4CH (cm²)</label><input type="number" step="0.1" id="ae_area_4ch" oninput="calcularTempo()"></div>
+                    <div class="form-group"><label>Área 2CH (cm²)</label><input type="number" step="0.1" id="ae_area_2ch" oninput="calcularTempo()"></div>
+                    <div class="form-group"><label>Eixo Longo (cm)</label><input type="number" step="0.1" id="ae_eixo_longo" placeholder="Mín. de 4CH/2CH" oninput="calcularTempo()"></div>
+                    <div class="form-group"><label>Diâm AP 3CH (cm)</label><input type="number" step="0.1" id="ae_diam_ap" oninput="calcularTempo()"></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="dot ad"></span>Átrio Direito<button class="ref-link" onclick="mostrarReferencia('AD')" title="Ver tabela de referência">* Referência</button></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Área 4CH (cm²)</label><input type="number" step="0.1" id="ad_area_4ch" oninput="calcularTempo()"></div>
+                    <div class="form-group"><label>Área 2CH (cm²)</label><input type="number" step="0.1" id="ad_area_2ch" oninput="calcularTempo()"></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">🗺️ Mapas Paramétricos</div>
+                <div class="form-row">
+                    <div class="form-group"><label>T1 Mio Pré (ms)</label><input type="number" step="0.1" id="t1_mio_pre" oninput="calcularTempo()"></div>
+                    <div class="form-group"><label>T1 Sangue Pré (ms)</label><input type="number" step="0.1" id="t1_sangue_pre" oninput="calcularTempo()"></div>
+                    <div class="form-group"><label>T1 Mio Pós (ms)</label><input type="number" step="0.1" id="t1_mio_pos" oninput="calcularTempo()"></div>
+                    <div class="form-group"><label>T1 Sangue Pós (ms)</label><input type="number" step="0.1" id="t1_sangue_pos" oninput="calcularTempo()"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Campo Magnético</label>
+                        <select id="campo_magnetico" onchange="calcularTempo()">
+                            <option value="1.5">1.5T</option>
+                            <option value="3">3T</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Hematócrito (0-1)</label>
+                        <input type="number" step="0.01" id="hematocrito" placeholder="ex: 0,42" oninput="calcularTempo()">
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0;">
+                            <input type="checkbox" id="usar_ht_sintetico" onchange="calcularTempo()" style="width: 18px; height: 18px;">
+                            <span>Usar HT Sintético</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>T2 Nativo (ms)</label><input type="number" step="0.1" id="t2_nativo" oninput="calcularTempo()"></div>
+                    <div class="form-group"><label>T2* (ms)</label><input type="number" step="0.1" id="t2_estrela" oninput="calcularTempo()"></div>
+                </div>
+            </div>
+        </div>
+        <div class="right-panel">
+            <div class="results-header">
+                <h2 class="results-title">Resultados</h2>
+                <label class="abnt-toggle">
+                    <input type="checkbox" id="arredondarABNT" onchange="calcularTempo()" style="width: 18px; height: 18px; cursor: pointer;">
+                    <span>Arredondar ABNT</span>
+                </label>
+            </div>
+            <div class="result-card">
+                <div class="section-title"><span class="dot ve"></span>Ventrículo Esquerdo<button class="ref-link" onclick="mostrarReferencia('VE')" title="Ver tabela de referência">* Referência</button></div>
+                <div class="result-grid">
+                    <div class="result-item" id="card_ve_edv" data-tooltip="Volume Diastólico Final"><span class="status-badge" id="badge_ve_edv">-</span><label>VDF</label><span class="value" id="result_ve_edv">-</span><span class="unit">ml</span><div class="reference" id="ref_ve_edv">Ref: -</div></div>
+                    <div class="result-item" id="card_ve_edv_index" data-tooltip="VDF Indexado por ASC"><span class="status-badge" id="badge_ve_edv_index">-</span><label>VDF Index</label><span class="value" id="result_ve_edv_index">-</span><span class="unit">ml/m²</span><div class="reference" id="ref_ve_edv_index">Ref: -</div></div>
+                    <div class="result-item" id="card_ve_esv" data-tooltip="Volume Sistólico Final"><span class="status-badge" id="badge_ve_esv">-</span><label>VSF</label><span class="value" id="result_ve_esv">-</span><span class="unit">ml</span><div class="reference" id="ref_ve_esv">Ref: -</div></div>
+                    <div class="result-item" id="card_ve_esv_index" data-tooltip="VSF Indexado por ASC"><span class="status-badge" id="badge_ve_esv_index">-</span><label>VSF Index</label><span class="value" id="result_ve_esv_index">-</span><span class="unit">ml/m²</span><div class="reference" id="ref_ve_esv_index">Ref: -</div></div>
+                    <div class="result-item" id="card_ve_ef" data-tooltip="Fração de Ejeção (FEVE)"><span class="status-badge" id="badge_ve_ef">-</span><label>Fração de Ejeção</label><span class="value" id="result_ve_ef">-</span><span class="unit">%</span><div class="reference" id="ref_ve_ef">Ref: -</div></div>
+                    <div class="result-item" id="card_ve_vol_ejetado" data-tooltip="Volume Ejetado (VDF − VSF)"><span class="status-badge" id="badge_ve_vol_ejetado">-</span><label>Vol. Ejetado</label><span class="value" id="result_ve_vol_ejetado">-</span><span class="unit">ml</span><div class="reference" id="ref_ve_vol_ejetado">Ref: -</div><div id="card_diff_volumes_ve" style="display:none;"></div></div>
+                    <div class="result-item" id="card_ve_vol_ejetado_index" data-tooltip="Volume Ejetado Indexado por ASC"><span class="status-badge" id="badge_ve_vol_ejetado_index">-</span><label>Vol. Ejet. Index</label><span class="value" id="result_ve_vol_ejetado_index">-</span><span class="unit">ml/m²</span><div class="reference" id="ref_ve_vol_ejetado_index">Ref: -</div></div>
+                    <div class="result-item" id="card_ve_massa" data-tooltip="Massa Miocárdica VE"><span class="status-badge" id="badge_ve_massa">-</span><label>Massa</label><span class="value" id="result_ve_massa">-</span><span class="unit">g</span><div class="reference" id="ref_ve_massa">Ref: -</div></div>
+                    <div class="result-item" id="card_ve_massa_index" data-tooltip="Massa VE Indexada por ASC"><span class="status-badge" id="badge_ve_massa_index">-</span><label>Massa Index</label><span class="value" id="result_ve_massa_index">-</span><span class="unit">g/m²</span><div class="reference" id="ref_ve_massa_index">Ref: -</div></div>
+                </div>
+            </div>
+            <div class="result-card">
+                <div class="section-title"><span class="dot vd"></span>Ventrículo Direito<button class="ref-link" onclick="mostrarReferencia('VD')" title="Ver tabela de referência">* Referência</button></div>
+                <div class="result-grid">
+                    <div class="result-item" id="card_vd_edv" data-tooltip="Volume Diastólico Final VD"><span class="status-badge" id="badge_vd_edv">-</span><label>VDF</label><span class="value" id="result_vd_edv">-</span><span class="unit">ml</span><div class="reference" id="ref_vd_edv">Ref: -</div></div>
+                    <div class="result-item" id="card_vd_edv_index" data-tooltip="VDF VD Indexado por ASC"><span class="status-badge" id="badge_vd_edv_index">-</span><label>VDF Index</label><span class="value" id="result_vd_edv_index">-</span><span class="unit">ml/m²</span><div class="reference" id="ref_vd_edv_index">Ref: -</div></div>
+                    <div class="result-item" id="card_vd_esv" data-tooltip="Volume Sistólico Final VD"><span class="status-badge" id="badge_vd_esv">-</span><label>VSF</label><span class="value" id="result_vd_esv">-</span><span class="unit">ml</span><div class="reference" id="ref_vd_esv">Ref: -</div></div>
+                    <div class="result-item" id="card_vd_esv_index" data-tooltip="VSF VD Indexado por ASC"><span class="status-badge" id="badge_vd_esv_index">-</span><label>VSF Index</label><span class="value" id="result_vd_esv_index">-</span><span class="unit">ml/m²</span><div class="reference" id="ref_vd_esv_index">Ref: -</div></div>
+                    <div class="result-item" id="card_vd_ef" data-tooltip="Fração de Ejeção VD"><span class="status-badge" id="badge_vd_ef">-</span><label>Fração de Ejeção</label><span class="value" id="result_vd_ef">-</span><span class="unit">%</span><div class="reference" id="ref_vd_ef">Ref: -</div></div>
+                    <div class="result-item" id="card_vd_vol_ejetado" data-tooltip="Volume Ejetado VD (VDF − VSF)"><span class="status-badge" id="badge_vd_vol_ejetado">-</span><label>Vol. Ejetado</label><span class="value" id="result_vd_vol_ejetado">-</span><span class="unit">ml</span><div class="reference" id="ref_vd_vol_ejetado">Ref: -</div></div>
+                    <div class="result-item" id="card_vd_vol_ejetado_index" data-tooltip="Volume Ejetado VD Indexado por ASC"><span class="status-badge" id="badge_vd_vol_ejetado_index">-</span><label>Vol. Ejet. Index</label><span class="value" id="result_vd_vol_ejetado_index">-</span><span class="unit">ml/m²</span><div class="reference" id="ref_vd_vol_ejetado_index">Ref: -</div></div>
+                    <div class="result-item vd-massa-result hidden" id="card_vd_massa" data-tooltip="Massa Miocárdica VD"><span class="status-badge" id="badge_vd_massa">-</span><label>Massa</label><span class="value" id="result_vd_massa">-</span><span class="unit">g</span><div class="reference" id="ref_vd_massa">Ref: -</div></div>
+                    <div class="result-item vd-massa-result hidden" id="card_vd_massa_index" data-tooltip="Massa VD Indexada por ASC"><span class="status-badge" id="badge_vd_massa_index">-</span><label>Massa Index</label><span class="value" id="result_vd_massa_index">-</span><span class="unit">g/m²</span><div class="reference" id="ref_vd_massa_index">Ref: -</div></div>
+                </div>
+            </div>
+            <div class="result-card">
+                <div class="section-title"><span class="dot ae"></span>Átrio Esquerdo<button class="ref-link" onclick="mostrarReferencia('AE')" title="Ver tabela de referência">* Referência</button></div>
+                <div class="result-grid">
+                    <div class="result-item" id="card_ae_vol_index"><span class="status-badge" id="badge_ae_vol_index">-</span><label>Vol Index</label><span class="value" id="result_ae_vol_index">-</span><span class="unit">ml/m²</span><div class="reference" id="ref_ae_vol_index">Ref: -</div></div>
+                    <div class="result-item" id="card_ae_area_4ch_index"><span class="status-badge" id="badge_ae_area_4ch_index">-</span><label>Área 4CH Index</label><span class="value" id="result_ae_area_4ch_index">-</span><span class="unit">cm²/m²</span><div class="reference">Ref: -</div></div>
+                    <div class="result-item" id="card_ae_area_2ch_index"><span class="status-badge" id="badge_ae_area_2ch_index">-</span><label>Área 2CH Index</label><span class="value" id="result_ae_area_2ch_index">-</span><span class="unit">cm²/m²</span><div class="reference">Ref: -</div></div>
+                </div>
+            </div>
+            <div class="result-card">
+                <div class="section-title"><span class="dot ad"></span>Átrio Direito<button class="ref-link" onclick="mostrarReferencia('AD')" title="Ver tabela de referência">* Referência</button></div>
+                <div class="result-grid">
+                    <div class="result-item" id="card_ad_area_4ch_index"><span class="status-badge" id="badge_ad_area_4ch_index">-</span><label>Área 4CH Index</label><span class="value" id="result_ad_area_4ch_index">-</span><span class="unit">cm²/m²</span><div class="reference">Ref: -</div></div>
+                </div>
+            </div>
+            
+            <div class="result-card">
+                <div class="section-title">🗺️ Mapas Paramétricos</div>
+                <div class="result-grid">
+                    <div class="result-item" id="card_ecv"><span class="status-badge" id="badge_ecv">-</span><label>ECV</label><span class="value" id="result_ecv">-</span><span class="unit">%</span><div class="reference">Ref: -</div></div>
+                    <div class="result-item" id="card_ht_sintetico"><label>HT Sintético</label><span class="value" id="result_ht_sintetico">-</span><span class="unit"></span><div class="reference">-</div></div>
+                </div>
+            </div>
+
+            <div class="result-card" id="card_diff_volumes" style="display: none;">
+                <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: 6px;" id="diff_volumes_content">
+                    <span style="font-size: 1.5rem;">⚠️</span>
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 0.25rem;">Diferença entre Volumes Ejetados</div>
+                        <div style="font-size: 0.9rem;" id="diff_volumes_text">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <div class="editor-header">
+                    <div class="editor-title">📝 Laudo Médico</div>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <select id="mascaraSelect" onchange="gerarLaudo()" style="padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; cursor: pointer;">
+                            <option value="1">Máscara 1 - Completa</option>
+                            <option value="2">Máscara 2 - Simplificada</option>
+                        </select>
+                        <div class="editor-actions">
+                            <button class="btn btn-secondary" onclick="copiarLaudo()">📋 Copiar</button>
+                            <button class="btn btn-secondary" onclick="limparLaudo()">🗑️ Limpar</button>
+                            <button class="btn btn-secondary" onclick="salvarLaudo()">💾 Salvar</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="laudoEditor" contenteditable="true" spellcheck="false"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let currentMethod = 'manual';
+const referencias = {"ESC":{"Masculino":{"VE_EDV":{"nome":"VE Volume diast\u00f3lico final (EDV)","unidade":"mL","normal":{"min":106.0,"max":214.0},"discreto":{"min":215.0,"max":241.0},"moderado":{"min":242.0,"max":268.0},"acentuado":{"min":268.0,"max":999999},"tipo":"aumentado"},"VE_ESV":{"nome":"VE Volume sist\u00f3lico final (ESV)","unidade":"mL","normal":{"min":26.0,"max":82.0},"discreto":{"min":83.0,"max":96.0},"moderado":{"min":97.0,"max":110.0},"acentuado":{"min":110.0,"max":999999},"tipo":"aumentado"},"VE_EDV_INDEX":{"nome":"VE Volume diast\u00f3lico final indexado por \u00e1rea corporal (EDV/BSA)","unidade":"mL/m\u00b2","normal":{"min":57.0,"max":105.0},"discreto":{"min":106.0,"max":117.0},"moderado":{"min":118.0,"max":129.0},"acentuado":{"min":129.0,"max":999999},"tipo":"aumentado"},"VE_ESV_INDEX":{"nome":"VE Volume sist\u00f3lico final indexado por \u00e1rea corporal (ESV/BSA)","unidade":"mL/m\u00b2","normal":{"min":14.0,"max":38.0},"discreto":{"min":39.0,"max":44.0},"moderado":{"min":45.0,"max":50.0},"acentuado":{"min":50.0,"max":999999},"tipo":"aumentado"},"VE_EF":{"nome":"VE Fra\u00e7\u00e3o de eje\u00e7\u00e3o (EF)","unidade":"%","normal":{"min":57.0,"max":77.0},"discreto":{"min":41.0,"max":56.0},"moderado":{"min":30.0,"max":40.0},"acentuado":{"min":0,"max":30.0},"tipo":"reduzido"},"VE_VOL_EJETADO":{"nome":"VE Volume ejetado","unidade":"","normal":null,"discreto":null,"moderado":null,"acentuado":null,"tipo":"aumentado"},"VE_VOL_EJETADO_INDEX":{"nome":"VE Volume ejetado Indexado","unidade":"","normal":null,"discreto":null,"moderado":null,"acentuado":null,"tipo":"aumentado"},"VE_MASSA":{"nome":"VE Massa ventricular esquerda","unidade":"g","normal":{"min":92.0,"max":176.0},"discreto":{"min":177.0,"max":197.0},"moderado":{"min":198.0,"max":218.0},"acentuado":{"min":218.0,"max":999999},"tipo":"aumentado"},"VE_MASSA_INDEX":{"nome":"VE Massa indexada (Massa/BSA)","unidade":"g/m\u00b2","normal":{"min":49.0,"max":85.0},"discreto":{"min":86.0,"max":94.0},"moderado":{"min":95.0,"max":103.0},"acentuado":{"min":103.0,"max":999999},"tipo":"aumentado"},"VD_EDV":{"nome":"VD Volume diast\u00f3lico final (EDV)","unidade":"mL","normal":{"min":118.0,"max":250.0},"discreto":{"min":251.0,"max":283.0},"moderado":{"min":284.0,"max":316.0},"acentuado":{"min":316.0,"max":999999},"tipo":"aumentado"},"VD_ESV":{"nome":"VD Volume sist\u00f3lico final (ESV)","unidade":"mL","normal":{"min":41.0,"max":117.0},"discreto":{"min":118.0,"max":136.0},"moderado":{"min":137.0,"max":155.0},"acentuado":{"min":155.0,"max":999999},"tipo":"aumentado"},"VD_EDV_INDEX":{"nome":"VD Volume diast\u00f3lico final indexado por \u00e1rea corporal (EDV/BSA)","unidade":"mL/m\u00b2","normal":{"min":61.0,"max":121.0},"discreto":{"min":122.0,"max":136.0},"moderado":{"min":137.0,"max":151.0},"acentuado":{"min":151.0,"max":999999},"tipo":"aumentado"},"VD_ESV_INDEX":{"nome":"VD Volume sist\u00f3lico final indexado por \u00e1rea corporal (ESV/BSA)","unidade":"mL/m\u00b2","normal":{"min":19.0,"max":59.0},"discreto":{"min":60.0,"max":69.0},"moderado":{"min":70.0,"max":79.0},"acentuado":{"min":79.0,"max":999999},"tipo":"aumentado"},"VD_EF":{"nome":"VD Fra\u00e7\u00e3o de eje\u00e7\u00e3o (EF)","unidade":"%","normal":{"min":52.0,"max":72.0},"discreto":{"min":41.0,"max":52.0},"moderado":{"min":30.0,"max":40.0},"acentuado":{"min":0,"max":30.0},"tipo":"reduzido"},"VD_VOL_EJETADO":{"nome":"VD Volume ejetado","unidade":"","normal":null,"discreto":null,"moderado":null,"acentuado":null,"tipo":"aumentado"},"VD_VOL_EJETADO_INDEX":{"nome":"VD Volume ejetado Indexado","unidade":"","normal":null,"discreto":null,"moderado":null,"acentuado":null,"tipo":"aumentado"},"VD_MASSA":{"nome":"VD Massa ventricular direita","unidade":"g","normal":{"min":25.0,"max":57.0},"discreto":{"min":58.0,"max":65.0},"moderado":{"min":66.0,"max":73.0},"acentuado":{"min":73.0,"max":999999},"tipo":"aumentado"},"VD_MASSA_INDEX":{"nome":"VD Massa indexada (Massa/BSA)","unidade":"g/m\u00b2","normal":{"min":13.0,"max":29.0},"discreto":{"min":30.0,"max":33.0},"moderado":{"min":34.0,"max":37.0},"acentuado":{"min":37.0,"max":999999},"tipo":"aumentado"},"AE_VOL_INDEX":{"nome":"Volume m\u00e1ximo indexado por \u00e1rea corporal","unidade":"mL/m\u00b2","normal":{"min":26.0,"max":52.0},"discreto":{"min":53.0,"max":59.0},"moderado":{"min":60.0,"max":66.0},"acentuado":{"min":66.0,"max":999999},"tipo":"aumentado"},"AD_VOL_INDEX":{"nome":"Volume m\u00e1ximo indexado por \u00e1rea corporal","unidade":"mL/m\u00b2","normal":{"min":18.0,"max":90.0},"discreto":{"min":91.0,"max":108.0},"moderado":{"min":109.0,"max":126.0},"acentuado":{"min":126.0,"max":999999},"tipo":"aumentado"},"AD_AREA_4CH_INDEX":{"nome":"\u00c1rea m\u00e1xima 4 c\u00e2maras indexada","unidade":"cm\u00b2/m\u00b2","normal":{"min":8.0,"max":16.0},"discreto":{"min":17.0,"max":18.0},"moderado":{"min":19.0,"max":20.0},"acentuado":{"min":20.0,"max":999999},"tipo":"aumentado"}},"Feminino":{"VE_EDV":{"nome":"VE Volume diast\u00f3lico final (EDV)","unidade":"mL","normal":{"min":86.0,"max":178.0},"discreto":{"min":179.0,"max":201.0},"moderado":{"min":202.0,"max":224.0},"acentuado":{"min":224.0,"max":999999},"tipo":"aumentado"},"VE_ESV":{"nome":"VE Volume sist\u00f3lico final (ESV)","unidade":"mL","normal":{"min":22.0,"max":66.0},"discreto":{"min":67.0,"max":77.0},"moderado":{"min":78.0,"max":88.0},"acentuado":{"min":88.0,"max":999999},"tipo":"aumentado"},"VE_EDV_INDEX":{"nome":"VE Volume diast\u00f3lico final indexado por \u00e1rea corporal (EDV/BSA)","unidade":"mL/m\u00b2","normal":{"min":56.0,"max":96.0},"discreto":{"min":97.0,"max":106.0},"moderado":{"min":107.0,"max":116.0},"acentuado":{"min":116.0,"max":999999},"tipo":"aumentado"},"VE_ESV_INDEX":{"nome":"VE Volume sist\u00f3lico final indexado por \u00e1rea corporal (ESV/BSA)","unidade":"mL/m\u00b2","normal":{"min":14.0,"max":34.0},"discreto":{"min":35.0,"max":39.0},"moderado":{"min":40.0,"max":44.0},"acentuado":{"min":44.0,"max":999999},"tipo":"aumentado"},"VE_EF":{"nome":"VE Fra\u00e7\u00e3o de eje\u00e7\u00e3o (EF)","unidade":"%","normal":{"min":57.0,"max":77.0},"discreto":{"min":41.0,"max":56.0},"moderado":{"min":30.0,"max":40.0},"acentuado":{"min":0,"max":30.0},"tipo":"aumentado"},"VE_VOL_EJETADO":{"nome":"VE Volume ejetado","unidade":"","normal":null,"discreto":null,"moderado":null,"acentuado":null,"tipo":"aumentado"},"VE_VOL_EJETADO_INDEX":{"nome":"VE Volume ejetado Indexado","unidade":"","normal":null,"discreto":null,"moderado":null,"acentuado":null,"tipo":"aumentado"},"VE_MASSA":{"nome":"VE Massa ventricular esquerda","unidade":"g","normal":{"min":56.0,"max":140.0},"discreto":{"min":141.0,"max":161.0},"moderado":{"min":162.0,"max":182.0},"acentuado":{"min":182.0,"max":999999},"tipo":"aumentado"},"VE_MASSA_INDEX":{"nome":"VE Massa indexada (Massa/BSA)","unidade":"g/m\u00b2","normal":{"min":41.0,"max":81.0},"discreto":{"min":82.0,"max":91.0},"moderado":{"min":92.0,"max":101.0},"acentuado":{"min":101.0,"max":999999},"tipo":"aumentado"},"VD_EDV":{"nome":"VD Volume diast\u00f3lico final (EDV)","unidade":"mL","normal":{"min":77.0,"max":201.0},"discreto":{"min":202.0,"max":232.0},"moderado":{"min":233.0,"max":263.0},"acentuado":{"min":263.0,"max":999999},"tipo":"aumentado"},"VD_ESV":{"nome":"VD Volume sist\u00f3lico final (ESV)","unidade":"mL","normal":{"min":24.0,"max":84.0},"discreto":{"min":85.0,"max":99.0},"moderado":{"min":100.0,"max":114.0},"acentuado":{"min":114.0,"max":999999},"tipo":"aumentado"},"VD_EDV_INDEX":{"nome":"VD Volume diast\u00f3lico final indexado por \u00e1rea corporal (EDV/BSA)","unidade":"mL/m\u00b2","normal":{"min":48.0,"max":112.0},"discreto":{"min":113.0,"max":128.0},"moderado":{"min":129.0,"max":144.0},"acentuado":{"min":144.0,"max":999999},"tipo":"aumentado"},"VD_ESV_INDEX":{"nome":"VD Volume sist\u00f3lico final indexado por \u00e1rea corporal (ESV/BSA)","unidade":"mL/m\u00b2","normal":{"min":12.0,"max":52.0},"discreto":{"min":53.0,"max":62.0},"moderado":{"min":63.0,"max":72.0},"acentuado":{"min":72.0,"max":999999},"tipo":"aumentado"},"VD_EF":{"nome":"VD Fra\u00e7\u00e3o de eje\u00e7\u00e3o (EF)","unidade":"%","normal":{"min":51.0,"max":71.0},"discreto":{"min":41.0,"max":51.0},"moderado":{"min":30.0,"max":40.0},"acentuado":{"min":0,"max":30.0},"tipo":"reduzido"},"VD_VOL_EJETADO":{"nome":"VD Volume ejetado","unidade":"","normal":null,"discreto":null,"moderado":null,"acentuado":null,"tipo":"aumentado"},"VD_VOL_EJETADO_INDEX":{"nome":"VD Volume ejetado Indexado","unidade":"","normal":null,"discreto":null,"moderado":null,"acentuado":null,"tipo":"aumentado"},"VD_MASSA":{"nome":"VD Massa ventricular direita","unidade":"g","normal":{"min":21.0,"max":49.0},"discreto":{"min":50.0,"max":56.0},"moderado":{"min":57.0,"max":63.0},"acentuado":{"min":63.0,"max":999999},"tipo":"aumentado"},"VD_MASSA_INDEX":{"nome":"VD Massa indexada (Massa/BSA)","unidade":"g/m\u00b2","normal":{"min":12.0,"max":28.0},"discreto":{"min":29.0,"max":32.0},"moderado":{"min":33.0,"max":36.0},"acentuado":{"min":36.0,"max":999999},"tipo":"aumentado"}}},"ESC_AJUSTADO":{"Masculino":{"VE_EDV":{"nome":"VE Volume diast\u00f3lico final (EDV)","unidade":"mL","normal":{"min":106.0,"max":214.0},"discreto":{"min":215.0,"max":241.0},"moderado":{"min":242.0,"max":268.0},"acentuado":{"min":268.0,"max":999999},"tipo":"aumentado"},"VE_ESV":{"nome":"VE Volume sist\u00f3lico final (ESV)","unidade":"mL","normal":{"min":26.0,"max":82.0},"discreto":{"min":83.0,"max":96.0},"moderado":{"min":97.0,"max":110.0},"acentuado":{"min":110.0,"max":999999},"tipo":"aumentado"},"VE_EDV_INDEX":{"nome":"VE Volume diast\u00f3lico final indexado por \u00e1rea corporal (EDV/BSA)","unidade":"mL/m\u00b2","normal":{"min":57.0,"max":105.0},"discreto":{"min":106.0,"max":117.0},"moderado":{"min":118.0,"max":129.0},"acentuado":{"min":129.0,"max":999999},"tipo":"aumentado"},"VE_ESV_INDEX":{"nome":"VE Volume sist\u00f3lico final indexado por \u00e1rea corporal (ESV/BSA)","unidade":"mL/m\u00b2","normal":{"min":14.0,"max":38.0},"discreto":{"min":39.0,"max":44.0},"moderado":{"min":45.0,"max":50.0},"acentuado":{"min":50.0,"max":999999},"tipo":"aumentado"},"VE_EF":{"nome":"VE Fra\u00e7\u00e3o de eje\u00e7\u00e3o (EF)","unidade":"%","normal":{"min":50.0,"max":77.0},"discreto":{"min":41.0,"max":49.0},"moderado":{"min":30.0,"max":40.0},"acentuado":{"min":0,"max":30.0},"tipo":"reduzido"},"VE_VOL_EJETADO":{"nome":"VE Volume ejetado","unidade":"","normal":null,"discreto":null,"moderado":null,"acentuado":null,"tipo":"aumentado"},"VE_VOL_EJETADO_INDEX":{"nome":"VE Volume ejetado Indexado","unidade":"","normal":null,"discreto":null,"moderado":null,"acentuado":null,"tipo":"aumentado"},"VE_MASSA":{"nome":"VE Massa ventricular esquerda","unidade":"g","normal":{"min":92.0,"max":176.0},"discreto":{"min":177.0,"max":197.0},"moderado":{"min":198.0,"max":218.0},"acentuado":{"min":218.0,"max":999999},"tipo":"aumentado"},"VE_MASSA_INDEX":{"nome":"VE Massa indexada (Massa/BSA)","unidade":"g/m\u00b2","normal":{"min":49.0,"max":85.0},"discreto":{"min":86.0,"max":94.0},"moderado":{"min":95.0,"max":103.0},"acentuado":{"min":103.0,"max":999999},"tipo":"aumentado"},"VD_EDV":{"nome":"VD Volume diast\u00f3lico final (EDV)","unidade":"mL","normal":{"min":118.0,"max":250.0},"discreto":{"min":251.0,"max":283.0},"moderado":{"min":284.0,"max":316.0},"acentuado":{"min":316.0,"max":999999},"tipo":"aumentado"},"VD_ESV":{"nome":"VD Volume sist\u00f3lico final (ESV)","unidade":"mL","normal":{"min":41.0,"max":117.0},"discreto":{"min":118.0,"max":136.0},"moderado":{"min":137.0,"max":155.0},"acentuado":{"min":155.0,"max":999999},"tipo":"aumentado"},"VD_EDV_INDEX":{"nome":"VD Volume diast\u00f3lico final indexado por \u00e1rea corporal (EDV/BSA)","unidade":"mL/m\u00b2","normal":{"min":61.0,"max":121.0},"discreto":{"min":122.0,"max":136.0},"moderado":{"min":137.0,"max":151.0},"acentuado":{"min":151.0,"max":999999},"tipo":"aumentado"},"VD_ESV_INDEX":{"nome":"VD Volume sist\u00f3lico final indexado por \u00e1rea corporal (ESV/BSA)","unidade":"mL/m\u00b2","normal":{"min":19.0,"max":59.0},"discreto":{"min":60.0,"max":69.0},"moderado":{"min":70.0,"max":79.0},"acentuado":{"min":79.0,"max":999999},"tipo":"aumentado"},"VD_EF":{"nome":"VD Fra\u00e7\u00e3o de eje\u00e7\u00e3o (EF)","unidade":"%","normal":{"min":45.0,"max":72.0},"discreto":{"min":41.0,"max":45.0},"moderado":{"min":30.0,"max":40.0},"acentuado":{"min":0,"max":30.0},"tipo":"reduzido"},"VD_VOL_EJETADO":{"nome":"VD Volume ejetado","unidade":"","normal":null,"discreto":null,"moderado":null,"acentuado":null,"tipo":"aumentado"},"VD_VOL_EJETADO_INDEX":{"nome":"VD Volume ejetado Indexado","unidade":"","normal":null,"discreto":null,"moderado":null,"acentuado":null,"tipo":"aumentado"},"VD_MASSA":{"nome":"VD Massa ventricular direita","unidade":"g","normal":{"min":25.0,"max":57.0},"discreto":{"min":58.0,"max":65.0},"moderado":{"min":66.0,"max":73.0},"acentuado":{"min":73.0,"max":999999},"tipo":"aumentado"},"VD_MASSA_INDEX":{"nome":"VD Massa indexada (Massa/BSA)","unidade":"g/m\u00b2","normal":{"min":13.0,"max":29.0},"discreto":{"min":30.0,"max":33.0},"moderado":{"min":34.0,"max":37.0},"acentuado":{"min":37.0,"max":999999},"tipo":"aumentado"},"AE_VOL_INDEX":{"nome":"Volume m\u00e1ximo indexado por \u00e1rea corporal","unidade":"mL/m\u00b2","normal":{"min":26.0,"max":52.0},"discreto":{"min":53.0,"max":59.0},"moderado":{"min":60.0,"max":66.0},"acentuado":{"min":66.0,"max":999999},"tipo":"aumentado"},"AD_VOL_INDEX":{"nome":"Volume m\u00e1ximo indexado por \u00e1rea corporal","unidade":"mL/m\u00b2","normal":{"min":18.0,"max":90.0},"discreto":{"min":91.0,"max":108.0},"moderado":{"min":109.0,"max":126.0},"acentuado":{"min":126.0,"max":999999},"tipo":"aumentado"},"AD_AREA_4CH_INDEX":{"nome":"\u00c1rea m\u00e1xima 4 c\u00e2maras indexada","unidade":"cm\u00b2/m\u00b2","normal":{"min":8.0,"max":16.0},"discreto":{"min":17.0,"max":18.0},"moderado":{"min":19.0,"max":20.0},"acentuado":{"min":20.0,"max":999999},"tipo":"aumentado"}},"Feminino":{"VE_EDV":{"nome":"VE Volume diast\u00f3lico final (EDV)","unidade":"mL","normal":{"min":86.0,"max":178.0},"discreto":{"min":179.0,"max":201.0},"moderado":{"min":202.0,"max":224.0},"acentuado":{"min":224.0,"max":999999},"tipo":"aumentado"},"VE_ESV":{"nome":"VE Volume sist\u00f3lico final (ESV)","unidade":"mL","normal":{"min":22.0,"max":66.0},"discreto":{"min":67.0,"max":77.0},"moderado":{"min":78.0,"max":88.0},"acentuado":{"min":88.0,"max":999999},"tipo":"aumentado"},"VE_EDV_INDEX":{"nome":"VE Volume diast\u00f3lico final indexado por \u00e1rea corporal (EDV/BSA)","unidade":"mL/m\u00b2","normal":{"min":56.0,"max":96.0},"discreto":{"min":97.0,"max":106.0},"moderado":{"min":107.0,"max":116.0},"acentuado":{"min":116.0,"max":999999},"tipo":"aumentado"},"VE_ESV_INDEX":{"nome":"VE Volume sist\u00f3lico final indexado por \u00e1rea corporal (ESV/BSA)","unidade":"mL/m\u00b2","normal":{"min":14.0,"max":34.0},"discreto":{"min":35.0,"max":39.0},"moderado":{"min":40.0,"max":44.0},"acentuado":{"min":44.0,"max":999999},"tipo":"aumentado"},"VE_EF":{"nome":"VE Fra\u00e7\u00e3o de eje\u00e7\u00e3o (EF)","unidade":"%","normal":{"min":50.0,"max":77.0},"discreto":{"min":41.0,"max":49.0},"moderado":{"min":30.0,"max":40.0},"acentuado":{"min":0,"max":30.0},"tipo":"aumentado"},"VE_VOL_EJETADO":{"nome":"VE Volume ejetado","unidade":"","normal":null,"discreto":null,"moderado":null,"acentuado":null,"tipo":"aumentado"},"VE_VOL_EJETADO_INDEX":{"nome":"VE Volume ejetado Indexado","unidade":"","normal":null,"discreto":null,"moderado":null,"acentuado":null,"tipo":"aumentado"},"VE_MASSA":{"nome":"VE Massa ventricular esquerda","unidade":"g","normal":{"min":56.0,"max":140.0},"discreto":{"min":141.0,"max":161.0},"moderado":{"min":162.0,"max":182.0},"acentuado":{"min":182.0,"max":999999},"tipo":"aumentado"},"VE_MASSA_INDEX":{"nome":"VE Massa indexada (Massa/BSA)","unidade":"g/m\u00b2","normal":{"min":41.0,"max":81.0},"discreto":{"min":82.0,"max":91.0},"moderado":{"min":92.0,"max":101.0},"acentuado":{"min":101.0,"max":999999},"tipo":"aumentado"},"VD_EDV":{"nome":"VD Volume diast\u00f3lico final (EDV)","unidade":"mL","normal":{"min":77.0,"max":201.0},"discreto":{"min":202.0,"max":232.0},"moderado":{"min":233.0,"max":263.0},"acentuado":{"min":263.0,"max":999999},"tipo":"aumentado"},"VD_ESV":{"nome":"VD Volume sist\u00f3lico final (ESV)","unidade":"mL","normal":{"min":24.0,"max":84.0},"discreto":{"min":85.0,"max":99.0},"moderado":{"min":100.0,"max":114.0},"acentuado":{"min":114.0,"max":999999},"tipo":"aumentado"},"VD_EDV_INDEX":{"nome":"VD Volume diast\u00f3lico final indexado por \u00e1rea corporal (EDV/BSA)","unidade":"mL/m\u00b2","normal":{"min":48.0,"max":112.0},"discreto":{"min":113.0,"max":128.0},"moderado":{"min":129.0,"max":144.0},"acentuado":{"min":144.0,"max":999999},"tipo":"aumentado"},"VD_ESV_INDEX":{"nome":"VD Volume sist\u00f3lico final indexado por \u00e1rea corporal (ESV/BSA)","unidade":"mL/m\u00b2","normal":{"min":12.0,"max":52.0},"discreto":{"min":53.0,"max":62.0},"moderado":{"min":63.0,"max":72.0},"acentuado":{"min":72.0,"max":999999},"tipo":"aumentado"},"VD_EF":{"nome":"VD Fra\u00e7\u00e3o de eje\u00e7\u00e3o (EF)","unidade":"%","normal":{"min":45.0,"max":71.0},"discreto":{"min":41.0,"max":45.0},"moderado":{"min":30.0,"max":40.0},"acentuado":{"min":0,"max":30.0},"tipo":"reduzido"},"VD_VOL_EJETADO":{"nome":"VD Volume ejetado","unidade":"","normal":null,"discreto":null,"moderado":null,"acentuado":null,"tipo":"aumentado"},"VD_VOL_EJETADO_INDEX":{"nome":"VD Volume ejetado Indexado","unidade":"","normal":null,"discreto":null,"moderado":null,"acentuado":null,"tipo":"aumentado"},"VD_MASSA":{"nome":"VD Massa ventricular direita","unidade":"g","normal":{"min":21.0,"max":49.0},"discreto":{"min":50.0,"max":56.0},"moderado":{"min":57.0,"max":63.0},"acentuado":{"min":63.0,"max":999999},"tipo":"aumentado"},"VD_MASSA_INDEX":{"nome":"VD Massa indexada (Massa/BSA)","unidade":"g/m\u00b2","normal":{"min":12.0,"max":28.0},"discreto":{"min":29.0,"max":32.0},"moderado":{"min":33.0,"max":36.0},"acentuado":{"min":36.0,"max":999999},"tipo":"aumentado"}}}};
+        function classificarValor(valor, param, sexo, tipoRef) {
+            if (!sexo || !tipoRef || !referencias[tipoRef] || !referencias[tipoRef][sexo]) return null;
+            const ref = referencias[tipoRef][sexo][param];
+            if (!ref || !ref.normal) return null;
+            const tipo = ref.tipo;
+            
+            if (tipo === "aumentado") {
+                // Valores MAIORES são piores
+                if (valor >= ref.normal.min && valor <= ref.normal.max) return "normal";
+                if (ref.discreto && valor >= ref.discreto.min && valor <= ref.discreto.max) return "discreto";
+                if (ref.moderado && valor >= ref.moderado.min && valor <= ref.moderado.max) return "moderado";
+                if (ref.acentuado && valor >= ref.acentuado.min) return "acentuado";
+            } else {
+                // Valores MENORES são piores (tipo "reduzido")
+                if (ref.acentuado && valor <= ref.acentuado.max) return "acentuado";
+                if (ref.moderado && valor >= ref.moderado.min && valor <= ref.moderado.max) return "moderado";
+                if (ref.discreto && valor >= ref.discreto.min && valor <= ref.discreto.max) return "discreto";
+                if (valor >= ref.normal.min && valor <= ref.normal.max) return "normal";
+            }
+            return null;
+        }
+        function aplicarClassificacao(param, valor) {
+            const sexo = document.getElementById('sexo').value;
+            const tipoRef = document.getElementById('referencia').value;
+            if (!sexo || !tipoRef) return;
+            const classificacao = classificarValor(valor, param, sexo, tipoRef);
+            const card = document.getElementById(`card_${param.toLowerCase()}`);
+            const badge = document.getElementById(`badge_${param.toLowerCase()}`);
+            const refDiv = document.getElementById(`ref_${param.toLowerCase()}`);
+            if (!card || !badge || !refDiv) return;
+            card.classList.remove('normal', 'discreto', 'moderado', 'acentuado');
+            badge.classList.remove('normal', 'discreto', 'moderado', 'acentuado');
+            if (classificacao) {
+                card.classList.add(classificacao);
+                badge.classList.add(classificacao);
+                const ref = referencias[tipoRef][sexo][param];
+                const textos = {'normal': 'Normal','discreto': ref.tipo === 'aumentado' ? '↑ Discreto' : '↓ Discreto','moderado': ref.tipo === 'aumentado' ? '↑↑ Moderado' : '↓↓ Moderado','acentuado': ref.tipo === 'aumentado' ? '↑↑↑ Acentuado' : '↓↓↓ Acentuado'};
+                badge.textContent = textos[classificacao];
+                if (ref && ref.normal) refDiv.textContent = `Ref: ${ref.normal.min}-${ref.normal.max} ${ref.unidade}`;
+            } else { badge.textContent = '-'; }
+        }
+        function atualizarReferencias() {
+            const sexo = document.getElementById('sexo').value;
+            const tipoRef = document.getElementById('referencia').value;
+            if (!sexo || !tipoRef) return;
+            const params = ['VE_EDV','VE_ESV','VE_EDV_INDEX','VE_ESV_INDEX','VE_EF','VE_MASSA','VE_MASSA_INDEX','VD_EDV','VD_ESV','VD_EDV_INDEX','VD_ESV_INDEX','VD_EF','VD_MASSA','VD_MASSA_INDEX','AE_VOL_INDEX'];
+            params.forEach(param => {
+                const ref = referencias[tipoRef][sexo][param];
+                const refDiv = document.getElementById(`ref_${param.toLowerCase()}`);
+                if (ref && ref.normal && refDiv) refDiv.textContent = `Ref: ${ref.normal.min}-${ref.normal.max} ${ref.unidade}`;
+            });
+        }
+        function selectMethod(method) {
+            currentMethod = method;
+            const manualDiv = document.getElementById('manualMethod');
+            const appDiv = document.getElementById('appMethod');
+            const buttons = document.querySelectorAll('.method-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            if (method === 'manual') { manualDiv.classList.remove('hidden'); appDiv.classList.add('hidden'); buttons[0].classList.add('active'); }
+            else { manualDiv.classList.add('hidden'); appDiv.classList.remove('hidden'); buttons[1].classList.add('active'); }
+        }
+        function toggleMassaVD() {
+            const isChecked = document.getElementById('calcularMassaVD').checked;
+            document.querySelectorAll('.vd-epi-col').forEach(col => col.classList.toggle('hidden', !isChecked));
+            const vdMassaField = document.querySelector('.vd-massa-field');
+            if (vdMassaField) vdMassaField.classList.toggle('hidden', !isChecked);
+            document.querySelectorAll('.vd-massa-result').forEach(r => r.classList.toggle('hidden', !isChecked));
+        }
+        function adicionarCorte(tipo) {
+            const tbody = document.getElementById(tipo + 'TableBody');
+            const newRowNum = tbody.querySelectorAll('tr[data-row]').length + 1;
+            if (newRowNum > 20) { alert('⚠️ Máximo de 20 cortes!'); return; }
+            const vdEpiHidden = !document.getElementById('calcularMassaVD').checked;
+            if (tipo === 'dias') {
+                const newRow = `<tr data-row="${newRowNum}"><td>${newRowNum}</td><td><input type="number" step="0.1" id="dias_ve_endo_${newRowNum}" class="calc-input"></td><td><input type="number" step="0.1" id="dias_ve_epi_${newRowNum}" class="calc-input"></td><td><input type="number" step="0.1" id="dias_vd_endo_${newRowNum}" class="calc-input"></td><td class="vd-epi-col ${vdEpiHidden?'hidden':''}"><input type="number" step="0.1" id="dias_vd_epi_${newRowNum}" class="calc-input"></td></tr>`;
+                tbody.insertAdjacentHTML('beforeend', newRow);
+                ['dias_ve_endo_','dias_ve_epi_','dias_vd_endo_','dias_vd_epi_'].forEach(id => {const el=document.getElementById(id+newRowNum);if(el)el.addEventListener('input',calcularTotaisManual);});
+            } else {
+                const newRow = `<tr data-row="${newRowNum}"><td>${newRowNum}</td><td><input type="number" step="0.1" id="sist_ve_endo_${newRowNum}" class="calc-input"></td><td><input type="number" step="0.1" id="sist_vd_endo_${newRowNum}" class="calc-input"></td></tr>`;
+                tbody.insertAdjacentHTML('beforeend', newRow);
+                ['sist_ve_endo_','sist_vd_endo_'].forEach(id => {const el=document.getElementById(id+newRowNum);if(el)el.addEventListener('input',calcularTotaisManual);});
+            }
+        }
+        function removerCorte(tipo) {
+            const tbody = document.getElementById(tipo + 'TableBody');
+            const rows = tbody.querySelectorAll('tr[data-row]');
+            if (rows.length <= 1) { alert('⚠️ Mínimo 1 corte!'); return; }
+            rows[rows.length - 1].remove();
+            calcularTotaisManual();
+        }
+        function calcularASC() {
+            const altura = parseFloat(document.getElementById('altura').value);
+            const peso = parseFloat(document.getElementById('peso').value);
+            if (altura && peso) document.getElementById('asc').value = (0.007184 * Math.pow(altura, 0.725) * Math.pow(peso, 0.425)).toFixed(2);
+        }
+        document.getElementById('altura').addEventListener('input', calcularASC);
+        document.getElementById('peso').addEventListener('input', calcularASC);
+        function calcularTotaisManual() {
+            const calcTotal = (prefix, count, totalId) => {
+                let total = 0;
+                for (let i = 1; i <= count; i++) {
+                    const elem = document.getElementById(prefix + i);
+                    if (elem) total += parseFloat(elem.value) || 0;
+                }
+                const el = document.getElementById(totalId);
+                if (el) el.textContent = total.toFixed(1);
+            };
+            const diasCount = document.getElementById('diasTableBody').querySelectorAll('tr[data-row]').length;
+            const sistCount = document.getElementById('sistTableBody').querySelectorAll('tr[data-row]').length;
+            calcTotal('dias_ve_endo_', diasCount, 'dias_ve_total');
+            calcTotal('dias_ve_epi_', diasCount, 'dias_epi_total');
+            calcTotal('dias_vd_endo_', diasCount, 'dias_vd_total');
+            if (document.getElementById('calcularMassaVD').checked) calcTotal('dias_vd_epi_', diasCount, 'dias_vd_epi_total');
+            calcTotal('sist_ve_endo_', sistCount, 'sist_ve_total');
+            calcTotal('sist_vd_endo_', sistCount, 'sist_vd_total');
+        }
+        document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('.calc-input').forEach(i => i.addEventListener('input', calcularTempo)));
+        
+        // ========== FUNÇÃO DE ARREDONDAMENTO ABNT ==========
+        function arredondarABNT(valor) {
+            if (isNaN(valor) || valor === null) return valor;
+            
+            const parteInteira = Math.floor(valor);
+            const decimal = valor - parteInteira;
+            const primeiroDecimal = Math.floor(decimal * 10);
+            
+            if (primeiroDecimal >= 6) {
+                // ,6-9 arredonda pra cima
+                return Math.ceil(valor);
+            } else if (primeiroDecimal <= 4) {
+                // ,1-4 arredonda pra baixo
+                return Math.floor(valor);
+            } else {
+                // ,5 depende se o número que antecede é ímpar (vai pra cima) ou par (vai pra baixo)
+                if (parteInteira % 2 === 0) {
+                    return parteInteira; // par vai pra baixo
+                } else {
+                    return parteInteira + 1; // ímpar vai pra cima
+                }
+            }
+        }
+        
+        function formatarResultado(valor, casasDecimais = 1) {
+            const arredondar = document.getElementById('arredondarABNT')?.checked || false;
+            
+            if (isNaN(valor) || valor === null) return valor;
+            
+            if (arredondar) {
+                return arredondarABNT(valor).toFixed(0);
+            } else {
+                return valor.toFixed(casasDecimais);
+            }
+        }
+        
+        // ========== CÁLCULOS DE MAPAS PARAMÉTRICOS ==========
+        function calcularECV() {
+            const t1MioPre = parseFloat(document.getElementById('t1_mio_pre')?.value);
+            const t1SanguePre = parseFloat(document.getElementById('t1_sangue_pre')?.value);
+            const t1MioPos = parseFloat(document.getElementById('t1_mio_pos')?.value);
+            const t1SanguePos = parseFloat(document.getElementById('t1_sangue_pos')?.value);
+            let hematocrito = parseFloat(document.getElementById('hematocrito')?.value);
+            const usarHTSintetico = document.getElementById('usar_ht_sintetico')?.checked || false;
+            
+            // Calcular HT Sintético se marcado
+            let htSintetico = null;
+            if (usarHTSintetico && t1SanguePre) {
+                // Fórmula: Synthetic HCT baseado no T1 do sangue
+                // HT sintético = função do T1 nativo do sangue
+                const campo = parseFloat(document.getElementById('campo_magnetico')?.value) || 1.5;
+                if (campo === 1.5) {
+                    htSintetico = (1 / (0.00115 * t1SanguePre + 0.37));
+                } else {
+                    htSintetico = (1 / (0.00105 * t1SanguePre + 0.40));
+                }
+                hematocrito = htSintetico;
+                document.getElementById('result_ht_sintetico').textContent = formatarResultado(htSintetico, 2);
+            } else {
+                document.getElementById('result_ht_sintetico').textContent = '-';
+            }
+            
+            if (!t1MioPre || !t1SanguePre || !t1MioPos || !t1SanguePos || !hematocrito) {
+                document.getElementById('result_lambda').textContent = '-';
+                document.getElementById('result_ecv').textContent = '-';
+                return;
+            }
+            
+            // Calcular Lambda (λ)
+            // λ = (1/post T1_myo - 1/native T1_myo) / (1/post T1_blood - 1/native T1_blood)
+            const lambda = ((1/t1MioPos) - (1/t1MioPre)) / ((1/t1SanguePos) - (1/t1SanguePre));
+            
+            // Calcular ECV
+            // ECV = (1 - HCT) × λ
+            const ecv = (1 - hematocrito) * lambda * 100; // em porcentagem
+            
+            document.getElementById('result_lambda').textContent = formatarResultado(lambda, 3);
+            document.getElementById('result_ecv').textContent = formatarResultado(ecv, 1);
+            
+            // Classificar ECV baseado no campo magnético
+            const campo = parseFloat(document.getElementById('campo_magnetico')?.value) || 1.5;
+            const badge = document.getElementById('badge_ecv');
+            const card = document.getElementById('card_ecv');
+            
+            if (badge && card) {
+                card.classList.remove('normal', 'discreto', 'moderado', 'acentuado');
+                badge.classList.remove('normal', 'discreto', 'moderado', 'acentuado');
+                badge.dataset.grau = '';
+                
+                if (campo === 1.5) {
+                    // VN 25 ± 4% (1.5T) = 21-29%
+                    if (ecv >= 21 && ecv <= 29) {
+                        card.classList.add('normal');
+                        badge.classList.add('normal');
+                        badge.textContent = 'Normal'; badge.dataset.grau = 'normal';
+                    } else if (ecv > 29 && ecv <= 33) {
+                        card.classList.add('discreto');
+                        badge.classList.add('discreto');
+                        badge.textContent = '↑ Discreto'; badge.dataset.grau = 'discreto';
+                    } else if (ecv > 33 && ecv <= 37) {
+                        card.classList.add('moderado');
+                        badge.classList.add('moderado');
+                        badge.textContent = '↑↑ Moderado'; badge.dataset.grau = 'moderado';
+                    } else if (ecv > 37) {
+                        card.classList.add('acentuado');
+                        badge.classList.add('acentuado');
+                        badge.textContent = '↑↑↑ Acentuado'; badge.dataset.grau = 'acentuado';
+                    }
+                } else {
+                    // VN 26 ± 4% (3T) = 22-30%
+                    if (ecv >= 22 && ecv <= 30) {
+                        card.classList.add('normal');
+                        badge.classList.add('normal');
+                        badge.textContent = 'Normal'; badge.dataset.grau = 'normal';
+                    } else if (ecv > 30 && ecv <= 34) {
+                        card.classList.add('discreto');
+                        badge.classList.add('discreto');
+                        badge.textContent = '↑ Discreto'; badge.dataset.grau = 'discreto';
+                    } else if (ecv > 34 && ecv <= 38) {
+                        card.classList.add('moderado');
+                        badge.classList.add('moderado');
+                        badge.textContent = '↑↑ Moderado'; badge.dataset.grau = 'moderado';
+                    } else if (ecv > 38) {
+                        card.classList.add('acentuado');
+                        badge.classList.add('acentuado');
+                        badge.textContent = '↑↑↑ Acentuado'; badge.dataset.grau = 'acentuado';
+                    }
+                }
+            }
+        }
+        
+        function verificarDiferencaVolumes() {
+            const veVolEjetado = parseFloat(document.getElementById('result_ve_vol_ejetado')?.textContent);
+            const vdVolEjetado = parseFloat(document.getElementById('result_vd_vol_ejetado')?.textContent);
+            
+            if (!veVolEjetado || !vdVolEjetado || isNaN(veVolEjetado) || isNaN(vdVolEjetado)) return;
+            
+            const diferenca = Math.abs(veVolEjetado - vdVolEjetado);
+            const diffText = document.getElementById('diff_volumes_text');
+            const diffCard = document.getElementById('card_diff_volumes_ve');
+            
+            if (!diffText || !diffCard) return;
+            
+            if (diferenca > 15) {
+                const nivel = diferenca > 30 ? 'danger' : 'warning';
+                const msg = diferenca > 30 ? ' ⚠️ > 30 ml!' : ' > 15 ml';
+                diffText.textContent = 'Δ VE-VD: ' + formatarResultado(diferenca, 1) + ' ml' + msg;
+                diffCard.style.display = 'block';
+                diffCard.style.color = diferenca > 30 ? '#dc2626' : '#d97706';
+                diffCard.style.fontWeight = 'bold';
+                diffCard.style.fontSize = '0.8rem';
+                diffCard.style.marginTop = '0.5rem';
+            } else {
+                diffCard.style.display = 'none';
+            }
+        }
+        
+        function calcularTempo() {
+            calcularTotaisManual();
+            const asc = parseFloat(document.getElementById('asc').value);
+            const sexo = document.getElementById('sexo').value;
+            if (!asc || !sexo) return;
+            let veVDF, veVSF, veMassa, vdVDF, vdVSF, vdMassa;
+            const calcVDMassa = document.getElementById('calcularMassaVD').checked;
+            if (currentMethod === 'manual') {
+                veVDF = parseFloat(document.getElementById('dias_ve_total').textContent);
+                veVSF = parseFloat(document.getElementById('sist_ve_total').textContent);
+                vdVDF = parseFloat(document.getElementById('dias_vd_total').textContent);
+                vdVSF = parseFloat(document.getElementById('sist_vd_total').textContent);
+                const veEpi = parseFloat(document.getElementById('dias_epi_total').textContent);
+                veMassa = (veEpi - veVDF) * 1.05;
+                if (calcVDMassa) {
+                    const vdEpi = parseFloat(document.getElementById('dias_vd_epi_total').textContent);
+                    vdMassa = (vdEpi - vdVDF) * 1.05;
+                }
+            } else {
+                veVDF = parseFloat(document.getElementById('app_ve_vdf').value);
+                veVSF = parseFloat(document.getElementById('app_ve_vsf').value);
+                veMassa = parseFloat(document.getElementById('app_ve_massa').value);
+                vdVDF = parseFloat(document.getElementById('app_vd_vdf').value);
+                vdVSF = parseFloat(document.getElementById('app_vd_vsf').value);
+                if (calcVDMassa) vdMassa = parseFloat(document.getElementById('app_vd_massa').value);
+            }
+            const setResult = (id, val) => { const el = document.getElementById(id); if (el && !isNaN(val)) el.textContent = formatarResultado(val, 1); };
+            if (veVDF && veVSF) {
+                const veVDFI = veVDF / asc, veVSFI = veVSF / asc, veVE = veVDF - veVSF, veFE = (veVE / veVDF) * 100;
+                const veMassaI = veMassa / asc, veVEI = veVE / asc;
+                setResult('result_ve_edv', veVDF); setResult('result_ve_esv', veVSF);
+                setResult('result_ve_edv_index', veVDFI); setResult('result_ve_esv_index', veVSFI);
+                setResult('result_ve_ef', veFE); setResult('result_ve_vol_ejetado', veVE);
+                setResult('result_ve_vol_ejetado_index', veVEI); setResult('result_ve_massa', veMassa);
+                setResult('result_ve_massa_index', veMassaI);
+                aplicarClassificacao('VE_EDV', veVDF); aplicarClassificacao('VE_ESV', veVSF);
+                aplicarClassificacao('VE_EDV_INDEX', veVDFI); aplicarClassificacao('VE_ESV_INDEX', veVSFI);
+                aplicarClassificacao('VE_EF', veFE); aplicarClassificacao('VE_MASSA', veMassa);
+                aplicarClassificacao('VE_MASSA_INDEX', veMassaI);
+            }
+            if (vdVDF && vdVSF) {
+                const vdVDFI = vdVDF / asc, vdVSFI = vdVSF / asc, vdVE = vdVDF - vdVSF, vdFE = (vdVE / vdVDF) * 100;
+                const vdVEI = vdVE / asc;
+                setResult('result_vd_edv', vdVDF); setResult('result_vd_esv', vdVSF);
+                setResult('result_vd_edv_index', vdVDFI); setResult('result_vd_esv_index', vdVSFI);
+                setResult('result_vd_ef', vdFE); setResult('result_vd_vol_ejetado', vdVE);
+                setResult('result_vd_vol_ejetado_index', vdVEI);
+                if (calcVDMassa && vdMassa) {
+                    const vdMassaI = vdMassa / asc;
+                    setResult('result_vd_massa', vdMassa); setResult('result_vd_massa_index', vdMassaI);
+                    aplicarClassificacao('VD_MASSA', vdMassa); aplicarClassificacao('VD_MASSA_INDEX', vdMassaI);
+                }
+                aplicarClassificacao('VD_EDV', vdVDF); aplicarClassificacao('VD_ESV', vdVSF);
+                aplicarClassificacao('VD_EDV_INDEX', vdVDFI); aplicarClassificacao('VD_ESV_INDEX', vdVSFI);
+                aplicarClassificacao('VD_EF', vdFE);
+            }
+            const ae4ch = parseFloat(document.getElementById('ae_area_4ch').value);
+            const ae2ch = parseFloat(document.getElementById('ae_area_2ch').value);
+            const aeEixo = parseFloat(document.getElementById('ae_eixo_longo').value);
+            if (ae4ch && ae2ch && aeEixo) {
+                const aeVol = (8/3/Math.PI) * (ae4ch * ae2ch / aeEixo);
+                const aeVolI = aeVol / asc;
+                setResult('result_ae_vol_index', aeVolI);
+                aplicarClassificacao('AE_VOL_INDEX', aeVolI);
+            }
+            if (ae4ch) {
+                const ae4chI = ae4ch / asc;
+                setResult('result_ae_area_4ch_index', ae4chI);
+            }
+            if (ae2ch) {
+                const ae2chI = ae2ch / asc;
+                setResult('result_ae_area_2ch_index', ae2chI);
+            }
+            const ad4ch = parseFloat(document.getElementById('ad_area_4ch').value);
+            if (ad4ch) {
+                const ad4chI = ad4ch / asc;
+                setResult('result_ad_area_4ch_index', ad4chI);
+            }
+            
+            // Calcular ECV e mapas paramétricos
+            calcularECV();
+            
+            // Verificar diferença de volumes ejetados
+            verificarDiferencaVolumes();
+            
+            gerarLaudo();
+        }
+        
+        // ========== FUNÇÕES AUXILIARES PARA GERAÇÃO DE TEXTO ==========
+        function gerarTextoAtrios() {
+            const sexo = document.getElementById('sexo').value;
+            const tipoRef = document.getElementById('referencia').value;
+            const aeDiamAP = document.getElementById('ae_diam_ap').value || '[  ]';
+            const aeVolIndex = document.getElementById('result_ae_vol_index').textContent || '[  ]';
+            const adAreaIndex = document.getElementById('result_ad_area_4ch_index').textContent || '[  ]';
+            const refAE_Vol = '18-90';
+            const refAD_Area = '8-16';
+            const refAD_Vol = '18-90';
+            
+            const aeVolIndexVal = parseFloat(aeVolIndex);
+            const adAreaIndexVal = parseFloat(adAreaIndex);
+            
+            const aeClassif = classificarValor(aeVolIndexVal, 'AE_VOL_INDEX', sexo, tipoRef);
+            const aeAumentado = aeClassif && aeClassif !== 'normal';
+            const aeGrau = aeClassif === 'discreto' ? 'discreta' : aeClassif === 'moderado' ? 'moderada' : aeClassif === 'acentuado' ? 'acentuada' : '';
+            
+            let adClassif = 'normal';
+            let adGrau = '';
+            if (adAreaIndexVal > 20) { adClassif = 'acentuado'; adGrau = 'acentuada'; }
+            else if (adAreaIndexVal >= 19) { adClassif = 'moderado'; adGrau = 'moderada'; }
+            else if (adAreaIndexVal >= 17) { adClassif = 'discreto'; adGrau = 'discreta'; }
+            const adAumentado = adClassif !== 'normal';
+            
+            if (!aeAumentado && !adAumentado) {
+                return `Átrios cardíacos com dimensões normais. Átrio esquerdo com diâmetro anteroposterior de ${aeDiamAP} cm (VN 2,3-4,2 cm) e volume estimado em ${aeVolIndex} ml/m² (VN ${refAE_Vol} ml/m²).`;
+            } else if (!adAumentado && aeAumentado) {
+                return `Átrio direito com dimensões normais.\nÁtrio esquerdo com dilatação ${aeGrau}, diâmetro anteroposterior de ${aeDiamAP} cm (VN 2,3-4,2 cm) e volume estimado em ${aeVolIndex} ml/m² (VN ${refAE_Vol} ml/m²).`;
+            } else if (adAumentado && !aeAumentado) {
+                return `Átrio direito com dilatação ${adGrau}, área de ${adAreaIndex} cm²/m² no plano quatro câmaras (VN ${refAD_Area} cm²/m²) e volume estimado em [  ] ml/m² (VN ${refAD_Vol} ml/m²).\nÁtrio esquerdo com dimensões normais, diâmetro anteroposterior de ${aeDiamAP} cm (VN 2,3-4,2 cm) e volume estimado em ${aeVolIndex} ml/m² (VN ${refAE_Vol} ml/m²).`;
+            } else {
+                return `Átrio direito com dilatação ${adGrau}, área de ${adAreaIndex} cm²/m² no plano quatro câmaras (VN ${refAD_Area} cm²/m²) e volume estimado em [  ] ml/m² (VN ${refAD_Vol} ml/m²).\nÁtrio esquerdo com dilatação ${aeGrau}, diâmetro anteroposterior de ${aeDiamAP} cm (VN 2,3-4,2 cm) e volume estimado em ${aeVolIndex} ml/m² (VN ${refAE_Vol} ml/m²).`;
+            }
+        }
+        
+        function gerarTextoVE() {
+            const sexo = document.getElementById('sexo').value;
+            const tipoRef = document.getElementById('referencia').value;
+            const veEDVIndex = document.getElementById('result_ve_edv_index').textContent || '[  ]';
+            const veFE = document.getElementById('result_ve_ef').textContent || '[  ]';
+            
+            const veEDVIndexVal = parseFloat(veEDVIndex);
+            const veFEVal = parseFloat(veFE);
+            
+            const dimClassif = classificarValor(veEDVIndexVal, 'VE_EDV_INDEX', sexo, tipoRef);
+            const dimAumentada = dimClassif && dimClassif !== 'normal';
+            const dimGrau = dimClassif === 'discreto' ? 'discreto' : dimClassif === 'moderado' ? 'moderado' : dimClassif === 'acentuado' ? 'acentuado' : '';
+            
+            const funcClassif = classificarValor(veFEVal, 'VE_EF', sexo, tipoRef);
+            const funcReduzida = funcClassif && funcClassif !== 'normal';
+            const funcGrau = funcClassif === 'discreto' ? 'discreto' : funcClassif === 'moderado' ? 'moderado' : funcClassif === 'acentuado' ? 'acentuado' : '';
+            
+            if (!dimAumentada && !funcReduzida) {
+                return 'Ventrículo esquerdo com dimensões e função contrátil global preservadas, sem alterações na contratilidade segmentar.';
+            } else if (dimAumentada && !funcReduzida) {
+                return `Ventrículo esquerdo com dimensões aumentadas em grau ${dimGrau} e função contrátil global preservada. Sem alterações na contratilidade segmentar.`;
+            } else if (dimAumentada && funcReduzida) {
+                return `Ventrículo esquerdo com dimensões aumentadas em grau ${dimGrau} e função contrátil global reduzida em grau ${funcGrau}. Sem alterações na contratilidade segmentar.`;
+            } else {
+                return `Ventrículo esquerdo com dimensões normais e função contrátil global reduzida em grau ${funcGrau}. Sem alterações na contratilidade segmentar.`;
+            }
+        }
+        
+        function gerarTextoVD() {
+            const sexo = document.getElementById('sexo').value;
+            const tipoRef = document.getElementById('referencia').value;
+            const vdEDVIndex = document.getElementById('result_vd_edv_index').textContent || '[  ]';
+            const vdFE = document.getElementById('result_vd_ef').textContent || '[  ]';
+            
+            const vdEDVIndexVal = parseFloat(vdEDVIndex);
+            const vdFEVal = parseFloat(vdFE);
+            
+            const dimClassif = classificarValor(vdEDVIndexVal, 'VD_EDV_INDEX', sexo, tipoRef);
+            const dimAumentada = dimClassif && dimClassif !== 'normal';
+            const dimGrau = dimClassif === 'discreto' ? 'discreto' : dimClassif === 'moderado' ? 'moderado' : dimClassif === 'acentuado' ? 'acentuado' : '';
+            
+            const funcClassif = classificarValor(vdFEVal, 'VD_EF', sexo, tipoRef);
+            const funcReduzida = funcClassif && funcClassif !== 'normal';
+            const funcGrau = funcClassif === 'discreto' ? 'discreto' : funcClassif === 'moderado' ? 'moderado' : funcClassif === 'acentuado' ? 'acentuado' : '';
+            
+            if (!dimAumentada && !funcReduzida) {
+                return 'Ventrículo direito com dimensões e função contrátil global preservadas, sem alterações na contratilidade segmentar.';
+            } else if (dimAumentada && !funcReduzida) {
+                return `Ventrículo direito com dimensões aumentadas em grau ${dimGrau} e função contrátil global preservada. Sem alterações na contratilidade segmentar.`;
+            } else if (dimAumentada && funcReduzida) {
+                return `Ventrículo direito com dimensões aumentadas em grau ${dimGrau} e função contrátil global reduzida em grau ${funcGrau}. Sem alterações na contratilidade segmentar.`;
+            } else {
+                return `Ventrículo direito com dimensões normais e função contrátil global reduzida em grau ${funcGrau}. Sem alterações na contratilidade segmentar.`;
+            }
+        }
+        
+        function gerarTextoMapas() {
+            const t2 = document.getElementById('t2_nativo')?.value;
+            const t1 = document.getElementById('t1_mio_pre')?.value;
+            const ecv = document.getElementById('result_ecv')?.textContent;
+            const campo = document.getElementById('campo_magnetico')?.value || '1.5';
+            if (!t2 && !t1 && (!ecv || ecv === '-')) return '';
+            let linhas = [];
+            if (t2) linhas.push('T2 nativo: ' + t2 + ' ms (VN < 56 ms);');
+            if (campo === '1.5') {
+                if (t1) linhas.push('T1 nativo: ' + t1 + ' ms (VN 989 +/- 84 ms - 1,5T);');
+                if (ecv && ecv !== '-') linhas.push('Volume extracelular (ECV): ' + ecv + '% (VN 25 +/- 4% - 1,5T).');
+            } else {
+                if (t1) linhas.push('T1 nativo: ' + t1 + ' ms (VN 1196 +/- 94 ms - 3T);');
+                if (ecv && ecv !== '-') linhas.push('Volume extracelular (ECV): ' + ecv + '% (VN 26 +/- 4% - 3T).');
+            }
+            return linhas.join('\n');
+        }
+
+        function gerarResumoAlteracoes() {
+            const sexo = document.getElementById('sexo').value;
+            const tipoRef = document.getElementById('referencia').value;
+
+            // Valores
+            const aeVol  = parseFloat(document.getElementById('result_ae_vol_index')?.textContent);
+            const adArea = parseFloat(document.getElementById('result_ad_area_4ch_index')?.textContent);
+            const veEDVI = parseFloat(document.getElementById('result_ve_edv_index')?.textContent);
+            const veFE   = parseFloat(document.getElementById('result_ve_ef')?.textContent);
+            const vdEDVI = parseFloat(document.getElementById('result_vd_edv_index')?.textContent);
+            const vdFE   = parseFloat(document.getElementById('result_vd_ef')?.textContent);
+
+            // Classificações
+            const ae  = classificarValor(aeVol,  'AE_VOL_INDEX',      sexo, tipoRef);
+            const ad  = classificarValor(adArea, 'AD_AREA_4CH_INDEX',  sexo, tipoRef);
+            const veD = classificarValor(veEDVI, 'VE_EDV_INDEX',       sexo, tipoRef);
+            const veF = classificarValor(veFE,   'VE_EF',              sexo, tipoRef);
+            const vdD = classificarValor(vdEDVI, 'VD_EDV_INDEX',       sexo, tipoRef);
+            const vdF = classificarValor(vdFE,   'VD_EF',              sexo, tipoRef);
+
+            // Helper: grau feminino
+            const grau = g => g === 'discreto' ? 'discreta' : g === 'moderado' ? 'moderada' : 'acentuada';
+
+            const linhas = [];
+
+            // ── Átrios ──────────────────────────────────────────────
+            const aeAlterado = ae && ae !== 'normal';
+            const adAlterado = ad && ad !== 'normal';
+
+            if (!aeAlterado && !adAlterado) {
+                linhas.push('Átrios com dimensões normais.');
+            } else if (aeAlterado && !adAlterado) {
+                // AE alterado: AE primeiro
+                linhas.push('Átrio esquerdo com dilatação ' + grau(ae) + '. Átrio direito com dimensões normais.');
+            } else if (!aeAlterado && adAlterado) {
+                // AD alterado: AD primeiro
+                linhas.push('Átrio direito com dilatação ' + grau(ad) + '. Átrio esquerdo com dimensões normais.');
+            } else {
+                // Ambos alterados: mais grave primeiro
+                const ordemG = ['acentuado','moderado','discreto'];
+                if (ordemG.indexOf(ae) <= ordemG.indexOf(ad)) {
+                    linhas.push('Átrio esquerdo com dilatação ' + grau(ae) + '. Átrio direito com dilatação ' + grau(ad) + '.');
+                } else {
+                    linhas.push('Átrio direito com dilatação ' + grau(ad) + '. Átrio esquerdo com dilatação ' + grau(ae) + '.');
+                }
+            }
+
+            // ── Ventrículos ─────────────────────────────────────────
+            const veDimAlterado  = veD && veD !== 'normal';
+            const veFuncAlterado = veF && veF !== 'normal';
+            const vdDimAlterado  = vdD && vdD !== 'normal';
+            const vdFuncAlterado = vdF && vdF !== 'normal';
+            const veAlterado = veDimAlterado || veFuncAlterado;
+            const vdAlterado = vdDimAlterado || vdFuncAlterado;
+            const grauPeso = g => g === 'acentuado' ? 3 : g === 'moderado' ? 2 : g === 'discreto' ? 1 : 0;
+
+            const txVE = () => {
+                if (!veDimAlterado && !veFuncAlterado) return 'Ventrículo esquerdo com dimensões e função contrátil preservadas.';
+                let t = 'Ventrículo esquerdo com ';
+                if (veDimAlterado && veFuncAlterado) t += 'dimensões aumentadas em grau ' + veD + ' e função contrátil reduzida em grau ' + veF + '.';
+                else if (veDimAlterado) t += 'dimensões aumentadas em grau ' + veD + ' e função contrátil preservada.';
+                else t += 'dimensões preservadas e função contrátil reduzida em grau ' + veF + '.';
+                return t;
+            };
+            const txVD = () => {
+                if (!vdDimAlterado && !vdFuncAlterado) return 'Ventrículo direito com dimensões e função contrátil preservados.';
+                let t = 'Ventrículo direito com ';
+                if (vdDimAlterado && vdFuncAlterado) t += 'dimensões aumentadas em grau ' + vdD + ' e função contrátil reduzida em grau ' + vdF + '.';
+                else if (vdDimAlterado) t += 'dimensões aumentadas em grau ' + vdD + ' e função contrátil preservada.';
+                else t += 'dimensões preservadas e função contrátil reduzida em grau ' + vdF + '.';
+                return t;
+            };
+
+            if (!veAlterado && !vdAlterado) {
+                linhas.push('Ventrículos com dimensões, espessura miocárdica e função contrátil preservadas.');
+            } else if (veAlterado && !vdAlterado) {
+                linhas.push(txVE()); linhas.push(txVD());
+            } else if (!veAlterado && vdAlterado) {
+                // VD alterado: VD primeiro
+                linhas.push(txVD()); linhas.push(txVE());
+            } else {
+                // Ambos alterados: mais grave primeiro
+                const pesoVE = Math.max(grauPeso(veD), grauPeso(veF));
+                const pesoVD = Math.max(grauPeso(vdD), grauPeso(vdF));
+                if (pesoVE >= pesoVD) { linhas.push(txVE()); linhas.push(txVD()); }
+                else                  { linhas.push(txVD()); linhas.push(txVE()); }
+            }
+
+
+            // ── Realce / ECV ────────────────────────────────────────
+            // Pegar badge do ECV via data-grau (limpo, sem setas)
+            const ecvBadgeEl = document.getElementById('badge_ecv');
+            const ecvGrau = ecvBadgeEl?.dataset?.grau || '';
+            const ecvAlterado = ecvGrau && ecvGrau !== 'normal' && ecvGrau !== '';
+
+            // T1/T2 preenchidos?
+            const temMapas = !!(document.getElementById('t1_mio_pre')?.value || document.getElementById('t2_nativo')?.value);
+
+            if (!ecvAlterado && !temMapas) {
+                linhas.push('Não se identifica realce tardio, edema, alteração do T1 nativo ou do volume extracelular miocárdicos.');
+            } else if (ecvAlterado) {
+                linhas.push('Volume extracelular miocárdico aumentado em grau ' + ecvGrau + '.');
+                linhas.push('Não se identifica realce tardio ou edema miocárdico.');
+            } else {
+                linhas.push('Não se identifica realce tardio, edema, alteração do T1 nativo ou do volume extracelular miocárdicos.');
+            }
+
+            return linhas.join('\n');
+        }
+
+        function formatarLaudoHTML(texto) {
+            const titulosNegrito = ['Método', 'Análise', 'Comentários'];
+            return texto.split('\n').map(linha => {
+                const t = linha.trim();
+                if (t === '') return '<p style="margin:0;line-height:1.5"><br></p>';
+                if (t.startsWith('RESSONÂNCIA MAGNÉTICA'))
+                    return '<p style="margin:0;line-height:1.5;text-align:center;font-weight:bold">' + t + '</p>';
+                if (titulosNegrito.includes(t))
+                    return '<p style="margin:0;line-height:1.5;font-weight:bold">' + t + '</p>';
+                return '<p style="margin:0;line-height:1.5">' + t + '</p>';
+            }).join('');
+        }
+
+        function gerarLaudo() {
+            const mascaraSelecionada = document.getElementById('mascaraSelect').value;
+            const textoAtrios = gerarTextoAtrios();
+            const textoVE = gerarTextoVE();
+            const textoVD = gerarTextoVD();
+            const textoMapas = gerarTextoMapas();
+            const resumo = gerarResumoAlteracoes();
+            const mapasLinhas = textoMapas ? ['Mapas Paramétricos:'].concat(textoMapas.split('\n')) : [];
+
+            const v = {
+                AE_DIAM_AP:     document.getElementById('ae_diam_ap').value || '[  ]',
+                VD_EDV:         document.getElementById('result_vd_edv').textContent || '[  ]',
+                VD_EDV_INDEX:   document.getElementById('result_vd_edv_index').textContent || '[  ]',
+                VD_ESV_INDEX:   document.getElementById('result_vd_esv_index').textContent || '[  ]',
+                VD_EF:          document.getElementById('result_vd_ef').textContent || '[  ]',
+                VE_DDF:         document.getElementById('ve_ddf').value || '[  ]',
+                VE_EDV:         document.getElementById('result_ve_edv').textContent || '[  ]',
+                VE_EDV_INDEX:   document.getElementById('result_ve_edv_index').textContent || '[  ]',
+                VE_ESV_INDEX:   document.getElementById('result_ve_esv_index').textContent || '[  ]',
+                VE_EF:          document.getElementById('result_ve_ef').textContent || '[  ]',
+                VE_ESP_SEPTO:   document.getElementById('ve_esp_septo').value || '[  ]',
+                VE_MASSA:       document.getElementById('result_ve_massa').textContent || '[  ]',
+                VE_MASSA_INDEX: document.getElementById('result_ve_massa_index').textContent || '[  ]'
+            };
+
+            const rodape = [
+                '',
+                '*Valores de referência:',
+                '1 - Petersen et al. Eur Heart J Cardiovasc Imaging. 2019 Dec 1;20(12):1321-1331.',
+                '2 - Kawel-Boehm et al. Journal of Cardiovascular Magnetic Resonance (2020) 22:87.'
+            ];
+
+            let linhas = [];
+
+            if (mascaraSelecionada === '1') {
+                linhas = [
+                    'RESSONÂNCIA MAGNÉTICA DE CORAÇÃO', '',
+                    'Método', '',
+                    'Realizadas sequências de cinerressonância e morfológicas antes da administração endovenosa do meio de contraste paramagnético. Após a sua administração, foram realizadas sequências de perfusão miocárdica, volumétrica do tórax e de realce tardio. Exame realizado em repouso.',
+                    '', 'Análise', '',
+                    textoAtrios, '',
+                    textoVD + ' Volume diastólico final de ' + v.VD_EDV + ' ml e ' + v.VD_EDV_INDEX + ' ml/m², volume sistólico final de ' + v.VD_ESV_INDEX + ' ml/m² e fração de ejeção estimada em ' + v.VD_EF + '%.',
+                    '', 'Miocárdio ventricular direito com espessura e sinal preservados.', '',
+                    textoVE + ' Diâmetro diastólico final de ' + v.VE_DDF + ' cm, volume diastólico final de ' + v.VE_EDV + ' ml e ' + v.VE_EDV_INDEX + ' ml/m², volume sistólico final de ' + v.VE_ESV_INDEX + ' ml/m² e fração de ejeção estimada em ' + v.VE_EF + '%.',
+                    '', 'Miocárdio ventricular esquerdo:',
+                    'Espessura preservada, medindo até ' + v.VE_ESP_SEPTO + ' cm na parede septal basal (VN ≤ 1,2 cm);',
+                    'Massa estimada em ' + v.VE_MASSA + ' g e ' + v.VE_MASSA_INDEX + ' g/m²;',
+                    'Espessura relativa: [  ] (≤ 0,42);',
+                    'Índice relativo de massa: [  ] g/ml;',
+                ].concat(mapasLinhas.length ? [''].concat(mapasLinhas) : []).concat([
+                    '', 'Perfusão miocárdica em repouso sem sinais de isquemia.',
+                    'Não se identifica realce tardio miocárdico.',
+                    'Valvas cardíacas sem alterações evidentes ao método.',
+                    'Não se observa espessamento ou derrame pericárdico.',
+                    'Aorta torácica e tronco pulmonar com calibre normal.',
+                    '', 'Comentários', ''
+                ]).concat(resumo.split('\n')).concat(rodape);
+
+            } else if (mascaraSelecionada === '2') {
+                const atriosTexto = (textoAtrios.includes('dimensões normais') && !textoAtrios.includes('dilatação'))
+                    ? 'Átrios com dimensões normais.' : textoAtrios;
+
+                linhas = [
+                    'RESSONÂNCIA MAGNÉTICA DE CORAÇÃO', '',
+                    'Método', '',
+                    'Realizadas sequências de cinerressonância e morfológicas antes da administração endovenosa do meio de contraste paramagnético. Após a sua administração, foram realizadas sequências de perfusão miocárdica, volumétrica do tórax e de realce tardio. Exame realizado em repouso.',
+                    '', 'Análise', '',
+                    atriosTexto, '',
+                    textoVD, 'Miocárdio ventricular direito com espessura e sinal preservados.', '',
+                    textoVE, 'Miocárdio ventricular esquerdo com espessura preservada, medindo até ' + v.VE_ESP_SEPTO + ' cm na parede septal basal.',
+                ].concat(mapasLinhas.length ? [''].concat(mapasLinhas) : []).concat([
+                    '', 'Perfusão miocárdica em repouso sem sinais de isquemia.',
+                    'Não se identifica realce tardio miocárdico.',
+                    'Valvas cardíacas sem alterações evidentes ao método.',
+                    'Não se observa espessamento ou derrame pericárdico.',
+                    'Aorta torácica e tronco pulmonar com calibre normal.',
+                    '', 'Comentários', ''
+                ]).concat(resumo.split('\n')).concat(rodape);
+            }
+
+            document.getElementById('laudoEditor').innerHTML = formatarLaudoHTML(linhas.join('\n'));
+        }
+
+                function copiarLaudo() { const el=document.getElementById('laudoEditor'); const r=document.createRange(); r.selectNode(el); window.getSelection().removeAllRanges(); window.getSelection().addRange(r); document.execCommand('copy'); window.getSelection().removeAllRanges(); alert('✅ Copiado!'); }
+        function limparLaudo() { if (confirm('Limpar?')) document.getElementById('laudoEditor').innerHTML = ''; }
+        function salvarLaudo() {
+            const blob = new Blob([document.getElementById('laudoEditor').innerText], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `laudo_${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            alert('✅ Salvo!');
+        }
+
+        function mostrarReferencia(secao) {
+            const sexo  = document.getElementById('sexo')?.value || 'Masculino';
+            const tipoR = document.getElementById('referencia')?.value || 'ESC';
+            const ref   = referencias[tipoR]?.[sexo];
+            if (!ref) return;
+
+            const nomeRef = tipoR === 'ESC' ? 'ESC 2020 (Petersen et al.)' : 'ESC 2020 Ajustado';
+            document.getElementById('refModalFonte').textContent =
+                'Fonte: ' + nomeRef + ' · Sexo: ' + sexo + ' · Referência: ' + tipoR;
+
+            const configs = {
+                'VE': {
+                    titulo: 'Ventrículo Esquerdo — ' + sexo,
+                    params: ['VE_EDV','VE_EDV_INDEX','VE_ESV','VE_ESV_INDEX','VE_EF','VE_MASSA','VE_MASSA_INDEX']
+                },
+                'VD': {
+                    titulo: 'Ventrículo Direito — ' + sexo,
+                    params: ['VD_EDV','VD_EDV_INDEX','VD_ESV','VD_ESV_INDEX','VD_EF','VD_MASSA','VD_MASSA_INDEX']
+                },
+                'AE': {
+                    titulo: 'Átrio Esquerdo — ' + sexo,
+                    params: ['AE_VOL_INDEX']
+                },
+                'AD': {
+                    titulo: 'Átrio Direito — ' + sexo,
+                    params: ['AD_AREA_4CH_INDEX','AD_VOL_INDEX']
+                }
+            };
+
+            const cfg = configs[secao];
+            if (!cfg) return;
+
+            document.getElementById('refModalTitulo').textContent = cfg.titulo;
+
+            let rows = '';
+            cfg.params.forEach(p => {
+                const r = ref[p];
+                if (!r) return;
+                const nome = r.nome || p;
+                const un   = r.unidade || '';
+                const fmt  = (v) => v >= 999990 ? '>' + (v-1) : String(v);
+
+                const normal = r.normal ? `<span class="ref-badge-normal">${fmt(r.normal.min)}–${fmt(r.normal.max)}</span>` : '—';
+
+                let disc = '—', mod = '—', acent = '—';
+                if (r.tipo === 'reduzido') {
+                    disc  = r.discreto  ? `<span class="ref-badge-discreto">${fmt(r.discreto.min)}–${fmt(r.discreto.max)}</span>`  : '—';
+                    mod   = r.moderado  ? `<span class="ref-badge-moderado">${fmt(r.moderado.min)}–${fmt(r.moderado.max)}</span>`  : '—';
+                    acent = r.acentuado ? `<span class="ref-badge-acentuado">${fmt(r.acentuado.min)}–${fmt(r.acentuado.max)}</span>` : '—';
+                } else {
+                    disc  = r.discreto  ? `<span class="ref-badge-discreto">${fmt(r.discreto.min)}–${fmt(r.discreto.max)}</span>`  : '—';
+                    mod   = r.moderado  ? `<span class="ref-badge-moderado">${fmt(r.moderado.min)}–${fmt(r.moderado.max)}</span>`  : '—';
+                    acent = r.acentuado ? `<span class="ref-badge-acentuado">${fmt(r.acentuado.min)}+</span>` : '—';
+                }
+
+                rows += `<tr>
+                    <td>${nome}<br><small style="color:var(--ink-4);font-family:var(--font-mono)">${un}</small></td>
+                    <td>${normal}</td>
+                    <td>${disc}</td>
+                    <td>${mod}</td>
+                    <td>${acent}</td>
+                </tr>`;
+            });
+
+            document.getElementById('refModalConteudo').innerHTML = `
+                <table class="ref-table">
+                    <thead>
+                        <tr>
+                            <th>Parâmetro</th>
+                            <th>Normal</th>
+                            <th style="color:var(--w1)">Discreto</th>
+                            <th style="color:var(--w2)">Moderado</th>
+                            <th style="color:var(--err)">Acentuado</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>`;
+
+            document.getElementById('refModal').classList.add('open');
+        }
+
+        function fecharReferencia(event) {
+            if (event.target === document.getElementById('refModal')) {
+                document.getElementById('refModal').classList.remove('open');
+            }
+        }
+
+    </script>
+
+    <!-- Modal de Referência -->
+    <div id="refModal" onclick="fecharReferencia(event)">
+        <div class="ref-modal-box" id="refModalBox">
+            <div class="ref-modal-header">
+                <h3 id="refModalTitulo">Tabela de Referência</h3>
+                <button class="ref-modal-close" onclick="document.getElementById('refModal').classList.remove('open')">✕</button>
+            </div>
+            <div id="refModalConteudo"></div>
+            <p class="ref-source" id="refModalFonte"></p>
+        </div>
+    </div>
+</body>
+</html>
